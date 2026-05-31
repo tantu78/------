@@ -1,0 +1,50 @@
+[
+  {
+    "name": "西操场篮球场",
+    "sportType": "basketball",
+    "mapX": 1838,
+    "mapY": 5747
+  },
+  {
+    "name": "东操场篮球场",
+    "sportType": "basketball",
+    "mapX": 8289,
+    "mapY": 7611
+  },
+  {
+    "name": "西操场羽毛球场",
+    "sportType": "badminton",
+    "mapX": 1865,
+    "mapY": 6806
+  },
+  {
+    "name": "东操场乒乓球场",
+    "sportType": "pingpong",
+    "mapX": 9756,
+    "mapY": 7964
+  },
+  {
+    "name": "东操场足球场",
+    "sportType": "football",
+    "mapX": 9201,
+    "mapY": 8035
+  },
+  {
+    "name": "西操场足球场",
+    "sportType": "football",
+    "mapX": 966,
+    "mapY": 6241
+  },
+  {
+    "name": "空地",
+    "sportType": "other",
+    "mapX": 6094,
+    "mapY": 2048
+  },
+  {
+    "name": "靶场",
+    "sportType": "other",
+    "mapX": 5434,
+    "mapY": 8416
+  }
+]

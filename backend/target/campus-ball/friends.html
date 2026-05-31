@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>好友列表 - 校园约球平台</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .friends-container {
+            max-width: 1200px;
+            margin: 32px auto;
+            padding: 0 24px;
+        }
+        
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 32px;
+            color: var(--airbnb-dark);
+        }
+        
+        .section-card {
+            background: white;
+            border: 1px solid var(--airbnb-border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--airbnb-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .section-title i {
+            color: var(--airbnb-red);
+        }
+        
+        .friend-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+        
+        .friend-card {
+            border: 1px solid var(--airbnb-border);
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .friend-card:hover {
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .friend-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--airbnb-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: var(--airbnb-gray);
+        }
+        
+        .friend-info {
+            flex: 1;
+        }
+        
+        .friend-name {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+        
+        .friend-meta {
+            font-size: 14px;
+            color: var(--airbnb-gray);
+        }
+        
+        .friend-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .friend-actions .btn-primary,
+        .friend-actions .btn-secondary {
+            padding: 8px 12px;
+            font-size: 14px;
+        }
+        
+        .request-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            border: 1px solid var(--airbnb-border);
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .request-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .request-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 48px;
+            color: var(--airbnb-gray);
+        }
+        
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+        
+        .badge {
+            background: var(--airbnb-red);
+            color: white;
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav>
+        <div class="container nav-content">
+            <a href="index.html" class="logo">
+                <i class="fa fa-basketball-ball"></i>
+                <span>校园约球</span>
+            </a>
+            
+            <div class="nav-right">
+                <a href="friends.html" class="user-avatar" style="display: inline-flex;">
+                    <i class="fa fa-users"></i>
+                </a>
+                <a href="create-activity.html" class="btn-primary" style="padding: 8px 16px; font-size: 14px; display: none;">
+                    <i class="fa fa-plus mr-1"></i> 发起活动
+                </a>
+                <div class="notification-icon" style="display: none;">
+                    <i class="fa fa-bell"></i>
+                    <span class="notification-badge">0</span>
+                </div>
+                <a href="profile.html" class="user-avatar" style="display: none;">
+                    <i class="fa fa-user" style="color: var(--airbnb-gray);"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="friends-container">
+        <h1 class="page-title">好友列表</h1>
+        
+        <!-- 待处理申请 -->
+        <div class="section-card" id="requests-section" style="display: none;">
+            <h2 class="section-title">
+                <i class="fa fa-user-plus"></i>
+                待处理的好友申请
+                <span class="badge" id="requests-count">0</span>
+            </h2>
+            <div id="requests-list">
+                <div class="empty-state">
+                    <i class="fa fa-inbox"></i>
+                    <p>暂无待处理的好友申请</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 搜索添加好友 -->
+        <div class="section-card">
+            <h2 class="section-title">
+                <i class="fa fa-search"></i>
+                搜索并添加好友
+            </h2>
+            <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+                <input type="text" id="search-input" class="form-input" placeholder="输入用户名搜索" style="flex: 1;">
+                <button class="btn-primary" onclick="searchUsers()">
+                    <i class="fa fa-search"></i> 搜索
+                </button>
+            </div>
+            <div id="search-results" class="friend-list"></div>
+        </div>
+        
+        <!-- 好友列表 -->
+        <div class="section-card">
+            <h2 class="section-title">
+                <i class="fa fa-users"></i>
+                我的好友
+            </h2>
+            <div id="friends-list" class="friend-list">
+                <div class="empty-state">
+                    <i class="fa fa-spinner fa-spin"></i>
+                    <p>加载中...</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 好友的活动 -->
+        <div class="section-card">
+            <h2 class="section-title">
+                <i class="fa fa-calendar"></i>
+                好友的活动
+            </h2>
+            <div class="activities-grid" id="friend-activities">
+                <div class="empty-state">
+                    <i class="fa fa-spinner fa-spin"></i>
+                    <p>加载中...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        function getCurrentUser() {
+            var userStr = localStorage.getItem('currentUser');
+            return userStr ? JSON.parse(userStr) : null;
+        }
+        
+        function loadRequests() {
+            API.friend.requests().then(function(res) {
+                if (res.code === 200 && res.data && res.data.length > 0) {
+                    document.getElementById('requests-section').style.display = 'block';
+                    document.getElementById('requests-count').textContent = res.data.length;
+                    
+                    var html = '';
+                    res.data.forEach(function(request) {
+                        html += '<div class="request-card">' +
+                            '<div class="request-info">' +
+                            '<div class="friend-avatar"><i class="fa fa-user"></i></div>' +
+                            '<div class="friend-info">' +
+                            '<div class="friend-name">' + request.friendName + '</div>' +
+                            '<div class="friend-meta">申请成为你的好友</div>' +
+                            '</div>' +
+                            '</div>' +
+                            '<div class="request-actions">' +
+                            '<button class="btn-primary" onclick="acceptRequest(' + request.id + ')">接受</button>' +
+                            '<button class="btn-secondary" onclick="rejectRequest(' + request.id + ')">拒绝</button>' +
+                            '</div>' +
+                            '</div>';
+                    });
+                    document.getElementById('requests-list').innerHTML = html;
+                } else {
+                    document.getElementById('requests-section').style.display = 'none';
+                }
+            }).catch(function() {
+                document.getElementById('requests-section').style.display = 'none';
+            });
+        }
+        
+        function acceptRequest(id) {
+            API.friend.accept(id).then(function(res) {
+                if (res.code === 200) {
+                    alert('已同意好友申请');
+                    loadRequests();
+                    loadFriends();
+                } else {
+                    alert(res.message);
+                }
+            });
+        }
+        
+        function rejectRequest(id) {
+            API.friend.reject(id).then(function(res) {
+                if (res.code === 200) {
+                    alert('已拒绝好友申请');
+                    loadRequests();
+                } else {
+                    alert(res.message);
+                }
+            });
+        }
+        
+        function loadFriends() {
+            API.friend.list().then(function(res) {
+                if (res.code === 200 && res.data && res.data.length > 0) {
+                    var html = '';
+                    res.data.forEach(function(friend) {
+                        html += '<div class="friend-card">' +
+                            '<div class="friend-avatar"><i class="fa fa-user"></i></div>' +
+                            '<div class="friend-info">' +
+                            '<div class="friend-name">' + friend.username + '</div>' +
+                            '<div class="friend-meta">' + (friend.sportPreference || '普通用户') + '</div>' +
+                            '</div>' +
+                            '</div>';
+                    });
+                    document.getElementById('friends-list').innerHTML = html;
+                } else {
+                    document.getElementById('friends-list').innerHTML = '<div class="empty-state"><i class="fa fa-users"></i><p>暂无好友，快去添加吧</p></div>';
+                }
+            }).catch(function() {
+                document.getElementById('friends-list').innerHTML = '<div class="empty-state"><i class="fa fa-exclamation-triangle"></i><p>加载失败</p></div>';
+            });
+        }
+        
+        function loadFriendActivities() {
+            API.friend.activities().then(function(res) {
+                if (res.code === 200 && res.data && res.data.length > 0) {
+                    var html = '';
+                    res.data.forEach(function(activity) {
+                        html += '<a href="activity-detail.html?id=' + activity.id + '" class="card activity-card" style="text-decoration: none;">' +
+                            '<div class="activity-info">' +
+                            '<div class="activity-time"><i class="fa fa-clock-o"></i> ' + activity.startTime + '</div>' +
+                            '<div class="activity-title">' + activity.title + '</div>' +
+                            '<div class="activity-location"><i class="fa fa-map-marker"></i> ' + activity.venueName + '</div>' +
+                            '<div class="activity-meta">' +
+                            '<div class="activity-participants"><i class="fa fa-users"></i> ' + activity.currentParticipants + '/' + activity.maxParticipants + '人</div>' +
+                            '</div>' +
+                            '</div>' +
+                            '</a>';
+                    });
+                    document.getElementById('friend-activities').innerHTML = html;
+                } else {
+                    document.getElementById('friend-activities').innerHTML = '<div class="empty-state"><i class="fa fa-calendar"></i><p>暂无好友的活动</p></div>';
+                }
+            }).catch(function() {
+                document.getElementById('friend-activities').innerHTML = '<div class="empty-state"><i class="fa fa-exclamation-triangle"></i><p>加载失败</p></div>';
+            });
+        }
+        
+        function searchUsers() {
+            var keyword = document.getElementById('search-input').value.trim();
+            if (!keyword) {
+                alert('请输入用户名');
+                return;
+            }
+            
+            API.user.search(keyword).then(function(res) {
+                if (res.code === 200 && res.data && res.data.length > 0) {
+                    var currentUser = getCurrentUser();
+                    var html = '';
+                    res.data.forEach(function(user) {
+                        if (currentUser && user.id === currentUser.id) return;
+                        
+                        html += '<div class="friend-card">' +
+                            '<div class="friend-avatar"><i class="fa fa-user"></i></div>' +
+                            '<div class="friend-info">' +
+                            '<div class="friend-name">' + user.username + '</div>' +
+                            '<div class="friend-meta">' + (user.sportPreference || '普通用户') + '</div>' +
+                            '</div>' +
+                            '<button class="btn-primary" onclick="addFriend(' + user.id + ')">' +
+                            '<i class="fa fa-user-plus"></i> 添加' +
+                            '</button>' +
+                            '</div>';
+                    });
+                    document.getElementById('search-results').innerHTML = html || '<div class="empty-state"><i class="fa fa-search"></i><p>未找到用户</p></div>';
+                } else {
+                    document.getElementById('search-results').innerHTML = '<div class="empty-state"><i class="fa fa-search"></i><p>未找到用户</p></div>';
+                }
+            }).catch(function() {
+                document.getElementById('search-results').innerHTML = '<div class="empty-state"><i class="fa fa-exclamation-triangle"></i><p>搜索失败</p></div>';
+            });
+        }
+        
+        function addFriend(friendId) {
+            API.friend.add(friendId).then(function(res) {
+                if (res.code === 200) {
+                    alert(res.message);
+                } else {
+                    alert(res.message);
+                }
+            });
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            var user = getCurrentUser();
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            loadRequests();
+            loadFriends();
+            loadFriendActivities();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>校园约球平台 - Airbnb风格原型</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        airbnb: {
+                            red: '#FF5A5F',
+                            teal: '#00A699',
+                            orange: '#FC642D',
+                            dark: '#484848',
+                            gray: '#767676',
+                            border: '#EBEBEB',
+                            bg: '#F7F7F7'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    },
+                    borderRadius: {
+                        'airbnb': '12px'
+                    },
+                    boxShadow: {
+                        'airbnb': '0 2px 16px rgba(0, 0, 0, 0.08)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-balance {
+                text-wrap: balance;
+            }
+            .card-hover {
+                @apply transition-all duration-300 hover:shadow-airbnb hover:-translate-y-1;
+            }
+            .btn-primary {
+                @apply bg-airbnb-red text-white px-6 py-3 rounded-airbnb font-medium hover:bg-opacity-90 transition-all duration-300;
+            }
+            .btn-secondary {
+                @apply border border-airbnb-border bg-white px-6 py-3 rounded-airbnb font-medium hover:bg-airbnb-bg transition-all duration-300;
+            }
+        }
+    </style>
+</head>
+<body class="bg-white text-airbnb-dark font-sans">
+    <!-- 顶部导航栏 -->
+    <nav class="h-16 border-b border-airbnb-border sticky top-0 bg-white z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 h-full flex items-center justify-between">
+            <!-- Logo -->
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-basketball-ball text-airbnb-red text-2xl"></i>
+                <span class="font-bold text-xl">校园约球</span>
+            </div>
+
+            <!-- 搜索栏 -->
+            <div class="flex items-center border border-airbnb-border rounded-full shadow-sm hover:shadow-airbnb transition-all duration-300 px-4 py-2 w-96">
+                <i class="fa fa-search text-airbnb-gray mr-2"></i>
+                <input type="text" placeholder="搜索运动、场地、活动..." class="flex-1 outline-none text-sm">
+            </div>
+
+            <!-- 右侧操作区 -->
+            <div class="flex items-center space-x-4">
+                <button class="btn-primary text-sm py-2 px-4">
+                    <i class="fa fa-plus mr-1"></i> 发起活动
+                </button>
+                <div class="relative">
+                    <i class="fa fa-bell text-airbnb-gray text-xl cursor-pointer hover:text-airbnb-red"></i>
+                    <span class="absolute -top-1 -right-1 bg-airbnb-red text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">3</span>
+                </div>
+                <div class="w-10 h-10 rounded-full bg-airbnb-bg border border-airbnb-border flex items-center justify-center cursor-pointer hover:border-airbnb-red">
+                    <i class="fa fa-user text-airbnb-gray"></i>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 筛选栏 -->
+    <div class="border-b border-airbnb-border py-4">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex items-center space-x-8">
+                <button class="flex flex-col items-center pb-2 border-b-2 border-airbnb-red text-airbnb-red font-medium">
+                    <i class="fa fa-basketball-ball text-xl mb-1"></i>
+                    <span class="text-sm">全部</span>
+                </button>
+                <button class="flex flex-col items-center pb-2 border-b-2 border-transparent text-airbnb-gray hover:text-airbnb-dark transition-colors">
+                    <i class="fa fa-basketball-ball text-xl mb-1"></i>
+                    <span class="text-sm">篮球</span>
+                </button>
+                <button class="flex flex-col items-center pb-2 border-b-2 border-transparent text-airbnb-gray hover:text-airbnb-dark transition-colors">
+                    <i class="fa fa-table-tennis text-xl mb-1"></i>
+                    <span class="text-sm">羽毛球</span>
+                </button>
+                <button class="flex flex-col items-center pb-2 border-b-2 border-transparent text-airbnb-gray hover:text-airbnb-dark transition-colors">
+                    <i class="fa fa-table-tennis-paddle-ball text-xl mb-1"></i>
+                    <span class="text-sm">乒乓球</span>
+                </button>
+                <button class="flex flex-col items-center pb-2 border-b-2 border-transparent text-airbnb-gray hover:text-airbnb-dark transition-colors">
+                    <i class="fa fa-futbol text-xl mb-1"></i>
+                    <span class="text-sm">足球</span>
+                </button>
+                <div class="ml-auto">
+                    <button class="btn-secondary text-sm py-2 px-4 flex items-center">
+                        <i class="fa fa-map-marker mr-2"></i>
+                        按位置筛选
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- 顶部Banner -->
+        <div class="mb-12 rounded-airbnb overflow-hidden h-64 bg-gradient-to-r from-airbnb-red to-airbnb-orange relative">
+            <div class="absolute inset-0 bg-black bg-opacity-20"></div>
+            <div class="absolute inset-0 flex flex-col justify-center px-12">
+                <h1 class="text-white text-4xl font-bold mb-4">找到身边的球友，随时约球</h1>
+                <p class="text-white text-xl opacity-90 mb-6">覆盖全校所有运动场地，支持篮球、羽毛球、乒乓球等多种运动</p>
+                <button class="btn-primary w-40 bg-white text-airbnb-red hover:bg-opacity-90">
+                    立即找活动
+                </button>
+            </div>
+        </div>
+
+        <!-- 活动列表 -->
+        <div>
+            <h2 class="text-2xl font-bold mb-6">近期热门活动</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 活动卡片1 -->
+                <div class="rounded-airbnb border border-airbnb-border overflow-hidden card-hover">
+                    <div class="h-48 bg-gray-100 relative">
+                        <img src="https://picsum.photos/seed/basketball1/600/400" alt="篮球活动" class="w-full h-full object-cover">
+                        <span class="absolute top-3 left-3 bg-airbnb-red text-white text-xs font-medium px-2 py-1 rounded">
+                            热度高
+                        </span>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center text-airbnb-gray text-sm mb-2">
+                            <i class="fa fa-calendar mr-2"></i>
+                            <span>5月31日 周三 18:00 - 20:00</span>
+                        </div>
+                        <h3 class="font-medium text-lg mb-2">西校区篮球场3v3组队</h3>
+                        <div class="flex items-center text-sm mb-3">
+                            <i class="fa fa-map-marker text-airbnb-red mr-2"></i>
+                            <span>西校区室外篮球场1号场</span>
+                        </div>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center text-sm">
+                                <i class="fa fa-users text-airbnb-teal mr-2"></i>
+                                <span><span class="font-medium text-airbnb-teal">6</span>/8人</span>
+                            </div>
+                            <div class="text-sm text-airbnb-gray">
+                                组织者：张三
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="btn-primary flex-1 py-2 text-sm">
+                                立即加入
+                            </button>
+                            <button class="btn-secondary py-2 px-3 text-sm">
+                                <i class="fa fa-share-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 活动卡片2 -->
+                <div class="rounded-airbnb border border-airbnb-border overflow-hidden card-hover">
+                    <div class="h-48 bg-gray-100 relative">
+                        <img src="https://picsum.photos/seed/badminton1/600/400" alt="羽毛球活动" class="w-full h-full object-cover">
+                        <span class="absolute top-3 left-3 bg-airbnb-teal text-white text-xs font-medium px-2 py-1 rounded">
+                            新活动
+                        </span>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center text-airbnb-gray text-sm mb-2">
+                            <i class="fa fa-calendar mr-2"></i>
+                            <span>6月1日 周四 19:00 - 21:00</span>
+                        </div>
+                        <h3 class="font-medium text-lg mb-2">羽毛球馆双打缺2人</h3>
+                        <div class="flex items-center text-sm mb-3">
+                            <i class="fa fa-map-marker text-airbnb-red mr-2"></i>
+                            <span>东校区体育馆羽毛球2号场</span>
+                        </div>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center text-sm">
+                                <i class="fa fa-users text-airbnb-teal mr-2"></i>
+                                <span><span class="font-medium text-airbnb-teal">2</span>/4人</span>
+                            </div>
+                            <div class="text-sm text-airbnb-gray">
+                                组织者：李四
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="btn-primary flex-1 py-2 text-sm">
+                                立即加入
+                            </button>
+                            <button class="btn-secondary py-2 px-3 text-sm">
+                                <i class="fa fa-share-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 活动卡片3 -->
+                <div class="rounded-airbnb border border-airbnb-border overflow-hidden card-hover">
+                    <div class="h-48 bg-gray-100 relative">
+                        <img src="https://picsum.photos/seed/tabletennis1/600/400" alt="乒乓球活动" class="w-full h-full object-cover">
+                        <span class="absolute top-3 left-3 bg-airbnb-orange text-white text-xs font-medium px-2 py-1 rounded">
+                            即将开始
+                        </span>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center text-airbnb-gray text-sm mb-2">
+                            <i class="fa fa-calendar mr-2"></i>
+                            <span>今天 17:30 - 19:30</span>
+                        </div>
+                        <h3 class="font-medium text-lg mb-2">乒乓球新手局，随便打</h3>
+                        <div class="flex items-center text-sm mb-3">
+                            <i class="fa fa-map-marker text-airbnb-red mr-2"></i>
+                            <span>南校区活动中心乒乓球室</span>
+                        </div>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center text-sm">
+                                <i class="fa fa-users text-airbnb-teal mr-2"></i>
+                                <span><span class="font-medium text-airbnb-teal">3</span>/6人</span>
+                            </div>
+                            <div class="text-sm text-airbnb-gray">
+                                组织者：王五
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="btn-primary flex-1 py-2 text-sm">
+                                立即加入
+                            </button>
+                            <button class="btn-secondary py-2 px-3 text-sm">
+                                <i class="fa fa-share-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 推荐活动 -->
+        <div class="mt-12">
+            <h2 class="text-2xl font-bold mb-6">根据你的喜好推荐</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 推荐卡片1 -->
+                <div class="rounded-airbnb border border-airbnb-border overflow-hidden card-hover">
+                    <div class="h-48 bg-gray-100 relative">
+                        <img src="https://picsum.photos/seed/basketball2/600/400" alt="篮球活动" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center text-airbnb-gray text-sm mb-2">
+                            <i class="fa fa-calendar mr-2"></i>
+                            <span>6月2日 周五 18:30 - 20:30</span>
+                        </div>
+                        <h3 class="font-medium text-lg mb-2">周末篮球友谊赛，缺人</h3>
+                        <div class="flex items-center text-sm mb-3">
+                            <i class="fa fa-map-marker text-airbnb-red mr-2"></i>
+                            <span>西校区室内篮球馆</span>
+                        </div>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center text-sm">
+                                <i class="fa fa-users text-airbnb-teal mr-2"></i>
+                                <span><span class="font-medium text-airbnb-teal">8</span>/10人</span>
+                            </div>
+                            <div class="text-sm text-airbnb-gray">
+                                组织者：赵六
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="btn-primary flex-1 py-2 text-sm">
+                                立即加入
+                            </button>
+                            <button class="btn-secondary py-2 px-3 text-sm">
+                                <i class="fa fa-share-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-airbnb-bg border-t border-airbnb-border py-8 mt-16">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center text-airbnb-gray text-sm">
+                <p>© 2025 校园约球平台 · 让运动更简单</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

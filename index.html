@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>校园约球平台 - 找到身边的球友</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav>
+        <div class="container nav-content">
+            <a href="index.html" class="logo">
+                <i class="fa fa-basketball-ball"></i>
+                <span>校园约球</span>
+            </a>
+            
+            <div class="search-bar">
+                <i class="fa fa-search" style="color: var(--airbnb-gray);"></i>
+                <input type="text" placeholder="搜索运动类型、场地、活动...">
+            </div>
+            
+            <div class="nav-right">
+                <a href="login.html" class="btn-secondary nav-login" style="padding: 8px 16px; font-size: 14px;">登录</a>
+                <a href="register.html" class="btn-primary nav-register" style="padding: 8px 16px; font-size: 14px;">注册</a>
+                <a href="create-activity.html" class="btn-primary" style="padding: 8px 16px; font-size: 14px; display: none;">
+                    <i class="fa fa-plus mr-1"></i> 发起活动
+                </a>
+                <div class="notification-icon" style="display: none;">
+                    <i class="fa fa-bell"></i>
+                    <span class="notification-badge">0</span>
+                </div>
+                <a href="profile.html" class="user-avatar" style="display: none;">
+                    <i class="fa fa-user" style="color: var(--airbnb-gray);"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 筛选栏 -->
+    <div class="filter-bar">
+        <div class="container filter-content">
+            <a href="index.html" class="filter-item active">
+                <i class="fa fa-basketball-ball"></i>
+                <span>全部</span>
+            </a>
+            <a href="?type=basketball" class="filter-item">
+                <i class="fa fa-basketball-ball"></i>
+                <span>篮球</span>
+            </a>
+            <a href="?type=badminton" class="filter-item">
+                <i class="fa fa-table-tennis"></i>
+                <span>羽毛球</span>
+            </a>
+            <a href="?type=pingpong" class="filter-item">
+                <i class="fa fa-table-tennis-paddle-ball"></i>
+                <span>乒乓球</span>
+            </a>
+            <a href="?type=football" class="filter-item">
+                <i class="fa fa-futbol"></i>
+                <span>足球</span>
+            </a>
+            <div class="filter-right">
+                <a href="map.html" class="btn-secondary" style="padding: 8px 16px; font-size: 14px;">
+                    <i class="fa fa-map-marker mr-2"></i>
+                    按位置筛选
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <main class="container">
+        <!-- Hero区域 -->
+        <div class="hero">
+            <div class="hero-content">
+                <h1>找到身边的球友，随时约球</h1>
+                <p>覆盖全校所有运动场地，支持篮球、羽毛球、乒乓球等多种运动</p>
+                <button class="btn-primary">
+                    立即找活动
+                </button>
+            </div>
+        </div>
+
+        <!-- 热门活动 -->
+        <h2 class="section-title">近期热门活动</h2>
+        <div class="activities-grid" id="hot-activities">
+            <div class="empty-state" style="grid-column: 1/-1;">
+                <i class="fa fa-spinner fa-spin"></i>
+                <p>加载中...</p>
+            </div>
+        </div>
+
+        <!-- 推荐活动 -->
+        <h2 class="section-title">根据你的喜好推荐</h2>
+        <div class="activities-grid" id="recommend-activities">
+            <div class="empty-state" style="grid-column: 1/-1;">
+                <i class="fa fa-spinner fa-spin"></i>
+                <p>加载中...</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer>
+        <div class="container footer-content">
+            <p>© 2025 校园约球平台 · 让运动更简单</p>
+        </div>
+    </footer>
+
+    <script src="js/api.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        var currentSportType = null;
+
+        function getSportTypeFromUrl() {
+            var params = new URLSearchParams(window.location.search);
+            var type = params.get('type');
+            if (type) {
+                currentSportType = type;
+                var items = document.querySelectorAll('.filter-item');
+                items.forEach(function(item) {
+                    var href = item.getAttribute('href');
+                    item.classList.toggle('active', href && href.indexOf('type=' + type) !== -1);
+                });
+            }
+        }
+
+        function renderActivities(containerId, activities) {
+            var container = document.getElementById(containerId);
+            if (!activities || activities.length === 0) {
+                container.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;"><i class="fa fa-inbox"></i><p>暂无活动</p></div>';
+                return;
+            }
+            container.innerHTML = activities.map(function(a) { return activityCardHtml(a); }).join('');
+        }
+
+        function loadHotActivities() {
+            var params = {};
+            if (currentSportType) params.sportType = currentSportType;
+            params.size = 8;
+            API.activity.list(params).then(function(res) {
+                if (res.code === 200 && res.data) {
+                    var activities = res.data.content || res.data;
+                    renderActivities('hot-activities', activities);
+                } else {
+                    document.getElementById('hot-activities').innerHTML = '<div class="empty-state" style="grid-column: 1/-1;"><i class="fa fa-inbox"></i><p>暂无活动</p></div>';
+                }
+            }).catch(function() {
+                document.getElementById('hot-activities').innerHTML = '<div class="empty-state" style="grid-column: 1/-1;"><i class="fa fa-exclamation-triangle"></i><p>加载失败，请检查后端服务是否启动</p></div>';
+            });
+        }
+
+        function loadRecommendActivities() {
+            var user = getCurrentUser();
+            if (user) {
+                API.activity.recommend().then(function(res) {
+                    if (res.code === 200 && res.data) {
+                        renderActivities('recommend-activities', res.data);
+                    } else {
+                        document.getElementById('recommend-activities').innerHTML = '<div class="empty-state" style="grid-column: 1/-1;"><i class="fa fa-inbox"></i><p>登录后获取个性化推荐</p></div>';
+                    }
+                }).catch(function() {
+                    loadHotActivitiesFallback();
+                });
+            } else {
+                loadHotActivitiesFallback();
+            }
+        }
+
+        function loadHotActivitiesFallback() {
+            API.activity.list({ size: 4 }).then(function(res) {
+                if (res.code === 200 && res.data) {
+                    var activities = res.data.content || res.data;
+                    renderActivities('recommend-activities', activities);
+                } else {
+                    document.getElementById('recommend-activities').innerHTML = '<div class="empty-state" style="grid-column: 1/-1;"><i class="fa fa-inbox"></i><p>暂无活动</p></div>';
+                }
+            }).catch(function() {
+                document.getElementById('recommend-activities').innerHTML = '<div class="empty-state" style="grid-column: 1/-1;"><i class="fa fa-exclamation-triangle"></i><p>加载失败</p></div>';
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            getSportTypeFromUrl();
+            loadHotActivities();
+            loadRecommendActivities();
+        });
+    </script>
+</body>
+</html>

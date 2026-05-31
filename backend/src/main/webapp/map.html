@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>按位置筛选 - 校园地图</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .map-container {
+            display: grid;
+            grid-template-columns: 3fr 2fr;
+            gap: 32px;
+            margin: 32px 0;
+            min-height: 600px;
+        }
+
+        .campus-map {
+            position: relative;
+            background: var(--airbnb-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .campus-map img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .map-marker {
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            background: var(--airbnb-red);
+            border: 3px solid white;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+            z-index: 10;
+        }
+
+        .map-marker:hover {
+            transform: translate(-50%, -50%) scale(1.3);
+            z-index: 20;
+        }
+
+        .map-marker.selected {
+            transform: translate(-50%, -50%) scale(1.4);
+            background: var(--airbnb-teal);
+            border-color: var(--airbnb-teal);
+        }
+
+        .map-marker-label {
+            position: absolute;
+            transform: translate(-50%, -130%);
+            background: rgba(0, 0, 0, 0.78);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .activity-list-section {
+            background: white;
+            border: 1px solid var(--airbnb-border);
+            border-radius: 12px;
+            padding: 24px;
+            height: fit-content;
+            position: sticky;
+            top: 88px;
+        }
+
+        .activity-list-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .location-name {
+            color: var(--airbnb-red);
+            font-size: 16px;
+        }
+
+        .mini-activity-card {
+            border: 1px solid var(--airbnb-border);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            transition: all 0.3s ease;
+        }
+
+        .mini-activity-card:hover {
+            border-color: var(--airbnb-red);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .mini-activity-title {
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .mini-activity-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            color: var(--airbnb-gray);
+        }
+
+        .mini-activity-time {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .mini-activity-participants {
+            color: var(--airbnb-teal);
+            font-weight: 500;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px 0;
+            color: var(--airbnb-gray);
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 768px) {
+            .map-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav>
+        <div class="container nav-content">
+            <a href="index.html" class="logo">
+                <i class="fa fa-basketball-ball"></i>
+                <span>校园约球</span>
+            </a>
+            
+            <div class="search-bar">
+                <i class="fa fa-search" style="color: var(--airbnb-gray);"></i>
+                <input type="text" placeholder="搜索运动类型、场地、活动...">
+            </div>
+            
+            <div class="nav-right">
+                <a href="login.html" class="btn-secondary nav-login" style="padding: 8px 16px; font-size: 14px;">登录</a>
+                <a href="register.html" class="btn-primary nav-register" style="padding: 8px 16px; font-size: 14px;">注册</a>
+                <a href="create-activity.html" class="btn-primary" style="padding: 8px 16px; font-size: 14px; display: none;">
+                    <i class="fa fa-plus mr-1"></i> 发起活动
+                </a>
+                <div class="notification-icon" style="display: none;">
+                    <i class="fa fa-bell"></i>
+                    <span class="notification-badge">0</span>
+                </div>
+                <a href="profile.html" class="user-avatar" style="display: none;">
+                    <i class="fa fa-user" style="color: var(--airbnb-gray);"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区 -->
+    <main class="container">
+        <div style="margin-top: 24px;">
+            <a href="index.html" style="color: var(--airbnb-gray); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 16px;">
+                <i class="fa fa-arrow-left"></i>
+                <span>返回活动列表</span>
+            </a>
+        </div>
+
+        <h1 style="font-size: 32px; font-weight: 700; margin-bottom: 24px;">按位置筛选活动</h1>
+        <p style="color: var(--airbnb-gray); margin-bottom: 24px;">点击地图上的点位查看对应场地的活动</p>
+
+        <div class="map-container">
+            <div class="campus-map" id="campus-map">
+                <img src="学校地图.png" alt="校园地图">
+            </div>
+
+            <div class="activity-list-section">
+                <div class="activity-list-title">
+                    <span>该场地的活动</span>
+                    <span class="location-name" id="selected-location">请点击地图上的点位</span>
+                </div>
+                <div id="activity-list">
+                    <div class="empty-state">
+                        <i class="fa fa-map-marker"></i>
+                        <p>点击地图上的标记查看活动</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer>
+        <div class="container footer-content">
+            <p>© 2025 校园约球平台 · 让运动更简单</p>
+        </div>
+    </footer>
+
+    <script src="js/api.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        var venues = [];
+        var selectedVenueId = null;
+
+        function selectVenue(venueId) {
+            selectedVenueId = venueId;
+            document.querySelectorAll('.map-marker').forEach(function(m) {
+                m.classList.toggle('selected', m.getAttribute('data-venue-id') === String(venueId));
+            });
+
+            var venue = venues.find(function(v) { return v.id == venueId; });
+            document.getElementById('selected-location').textContent = venue ? venue.name : '未知场地';
+
+            loadVenueActivities(venueId);
+        }
+
+        function loadVenueActivities(venueId) {
+            var list = document.getElementById('activity-list');
+            list.innerHTML = '<div class="empty-state"><i class="fa fa-spinner fa-spin"></i><p>加载中...</p></div>';
+
+            API.activity.byVenue(venueId).then(function(res) {
+                if (res.code === 200 && res.data) {
+                    var activities = res.data;
+                    if (activities.length === 0) {
+                        list.innerHTML = '<div class="empty-state"><i class="fa fa-futbol-o"></i><p>该场地近期暂无活动</p><a href="create-activity.html" class="btn-primary" style="display:inline-block;margin-top:12px;">发起第一个活动</a></div>';
+                        return;
+                    }
+                    list.innerHTML = activities.map(function(a) {
+                        return '<a href="activity-detail.html?id=' + a.id + '" class="mini-activity-card">' +
+                            '<div class="mini-activity-title">' + a.title + '</div>' +
+                            '<div class="mini-activity-meta">' +
+                                '<div class="mini-activity-time"><i class="fa fa-calendar"></i><span>' + formatDateTime(a.startTime) + '</span></div>' +
+                                '<div class="mini-activity-participants">' + (a.currentParticipants || 0) + '/' + (a.maxParticipants || 0) + '人</div>' +
+                            '</div>' +
+                        '</a>';
+                    }).join('');
+                }
+            }).catch(function() {
+                list.innerHTML = '<div class="empty-state"><i class="fa fa-exclamation-triangle"></i><p>加载失败</p></div>';
+            });
+        }
+
+        function renderMarkers(venuesList) {
+            var container = document.getElementById('campus-map');
+            container.querySelectorAll('.map-marker, .map-marker-label').forEach(function(el) { el.remove(); });
+
+            venuesList.forEach(function(v) {
+                if (v.mapX == null || v.mapY == null) return;
+
+                var px = v.mapX / 100;
+                var py = v.mapY / 100;
+
+                var marker = document.createElement('div');
+                marker.className = 'map-marker';
+                marker.setAttribute('data-venue-id', v.id);
+                marker.style.left = px + '%';
+                marker.style.top = py + '%';
+                marker.title = v.name;
+                marker.addEventListener('click', function() {
+                    selectVenue(v.id);
+                });
+                container.appendChild(marker);
+
+                var label = document.createElement('div');
+                label.className = 'map-marker-label';
+                label.style.left = px + '%';
+                label.style.top = py + '%';
+                label.textContent = v.name;
+                container.appendChild(label);
+            });
+        }
+
+        function loadVenues() {
+            API.venue.list().then(function(res) {
+                if (res.code === 200 && res.data) {
+                    venues = res.data;
+                    renderMarkers(venues);
+                    if (venues.length > 0) {
+                        selectVenue(venues[0].id);
+                    }
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+            loadVenues();
+        });
+    </script>
+</body>
+</html>

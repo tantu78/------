@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>场地坐标标注工具 - 校园约球</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #1a1a2e; color: #eee; }
+
+        .toolbar {
+            position: fixed; top: 0; left: 0; right: 0; height: 56px;
+            background: #16213e; border-bottom: 1px solid #0f3460;
+            display: flex; align-items: center; padding: 0 20px; gap: 16px; z-index: 100;
+        }
+        .toolbar h2 { font-size: 18px; color: #e94560; }
+        .toolbar .btn {
+            padding: 8px 16px; border: 1px solid #0f3460; border-radius: 6px;
+            cursor: pointer; font-size: 13px; transition: all 0.2s;
+        }
+        .btn-mode { background: #16213e; color: #eee; }
+        .btn-mode.active { background: #e94560; border-color: #e94560; color: white; }
+        .btn-save { background: #0f3460; color: #eee; margin-left: auto; }
+        .btn-save:hover { background: #1a1a6e; }
+        .btn-export { background: #1a6b3c; color: #eee; }
+        .btn-export:hover { background: #228b4e; }
+        .btn-clear { background: #6b1a1a; color: #eee; }
+        .btn-clear:hover { background: #8b2222; }
+
+        .map-wrapper {
+            margin-top: 56px; display: flex; justify-content: center;
+            background: #111; min-height: calc(100vh - 56px - 40px);
+        }
+        .map-container {
+            position: relative; display: inline-block; cursor: crosshair;
+            user-select: none; -webkit-user-select: none;
+        }
+        .map-container img { display: block; max-width: 100vw; max-height: calc(100vh - 96px); }
+
+        .map-point {
+            position: absolute; width: 18px; height: 18px;
+            background: #e94560; border: 3px solid white; border-radius: 50%;
+            transform: translate(-50%, -50%); cursor: pointer; z-index: 10;
+            box-shadow: 0 0 6px rgba(233,69,96,0.6);
+        }
+        .map-point:hover { transform: translate(-50%, -50%) scale(1.3); z-index: 20; }
+        .map-point.selected { background: #00ff88; border-color: #00ff88; box-shadow: 0 0 12px rgba(0,255,136,0.8); }
+
+        .map-label {
+            position: absolute; transform: translate(-50%, -120%);
+            background: rgba(0,0,0,0.8); color: white; padding: 2px 8px;
+            border-radius: 4px; font-size: 11px; white-space: nowrap;
+            pointer-events: none; z-index: 5;
+        }
+
+        .coords-display {
+            position: fixed; bottom: 0; left: 0; right: 0; height: 40px;
+            background: #16213e; border-top: 1px solid #0f3460;
+            display: flex; align-items: center; padding: 0 20px; gap: 20px;
+            font-size: 13px; z-index: 100;
+        }
+        .coords-display span { color: #e94560; font-weight: 600; }
+
+        .panel {
+            position: fixed; top: 64px; right: 16px; width: 300px;
+            background: #16213e; border: 1px solid #0f3460; border-radius: 8px;
+            padding: 16px; z-index: 50; max-height: calc(100vh - 100px);
+            overflow-y: auto;
+        }
+        .panel h3 { font-size: 15px; margin-bottom: 12px; color: #e94560; }
+        .panel .field { margin-bottom: 10px; }
+        .panel label { display: block; font-size: 12px; color: #888; margin-bottom: 4px; }
+        .panel input, .panel select {
+            width: 100%; padding: 8px 10px; border: 1px solid #0f3460;
+            border-radius: 4px; background: #1a1a2e; color: #eee; font-size: 13px;
+        }
+        .panel input:focus, .panel select:focus { outline: none; border-color: #e94560; }
+        .venue-list { margin-top: 16px; }
+        .venue-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 8px 10px; border: 1px solid #0f3460; border-radius: 4px;
+            margin-bottom: 6px; cursor: pointer; font-size: 13px;
+        }
+        .venue-item:hover { border-color: #e94560; }
+        .venue-item .delete { color: #e94560; cursor: pointer; padding: 2px 6px; }
+        .venue-item .delete:hover { background: rgba(233,69,96,0.2); border-radius: 4px; }
+        .venue-item.current { border-color: #00ff88; }
+
+        .fake-point {
+            position: absolute; width: 14px; height: 14px;
+            background: rgba(233,69,96,0.5); border: 2px solid rgba(255,255,255,0.5);
+            border-radius: 50%; transform: translate(-50%, -50%);
+            pointer-events: none; z-index: 8;
+        }
+        .path-line {
+            position: absolute; pointer-events: none; z-index: 4;
+        }
+        .path-line line {
+            stroke: rgba(0,200,255,0.6); stroke-width: 2; stroke-dasharray: 6 3;
+        }
+    </style>
+</head>
+<body>
+    <div class="toolbar">
+        <h2><i class="fa fa-map-marker"></i> 场地坐标标注</h2>
+        <button class="btn btn-export" onclick="document.getElementById('map-file-input').click()" style="background: #1a6b3c; color: #eee;">
+            <i class="fa fa-folder-open"></i> 选择地图
+        </button>
+        <input type="file" id="map-file-input" accept="image/*" style="display: none;" onchange="loadMapFile(event)">
+        <button class="btn btn-mode active" id="btn-place" onclick="setMode('place')">
+            <i class="fa fa-plus"></i> 放置标记
+        </button>
+        <button class="btn btn-mode" id="btn-edit" onclick="setMode('edit')">
+            <i class="fa fa-arrows"></i> 拖拽编辑
+        </button>
+        <button class="btn btn-mode" id="btn-delete-mode" onclick="setMode('delete')">
+            <i class="fa fa-trash"></i> 删除模式
+        </button>
+        <button class="btn btn-export" onclick="exportData()">
+            <i class="fa fa-download"></i> 导出 JSON
+        </button>
+        <button class="btn btn-save" onclick="saveToServer()">
+            <i class="fa fa-cloud-upload"></i> 保存到服务端
+        </button>
+        <span style="font-size:12px; color:#888; margin-left: 12px;" id="status-msg"></span>
+    </div>
+
+    <div class="map-wrapper" id="map-wrapper">
+        <div class="map-container" id="map-container">
+            <div id="map-placeholder" style="display:flex;align-items:center;justify-content:center;width:100%;min-height:500px;border:2px dashed #0f3460;border-radius:8px;color:#666;font-size:16px;">
+                <div style="text-align:center;">
+                    <i class="fa fa-image" style="font-size:48px;margin-bottom:12px;display:block;opacity:0.4;"></i>
+                    点击上方"选择地图"按钮打开校园地图图片
+                </div>
+            </div>
+            <img src="" id="map-image" alt="校园地图" style="display:none;">
+        </div>
+    </div>
+
+    <div class="coords-display">
+        <span>鼠标位置: <span id="mouse-coords">- , -</span></span>
+        <span>百分比: <span id="mouse-percent">- %, - %</span></span>
+        <span>已标记: <span id="count-display">0</span> 个场地</span>
+    </div>
+
+    <div class="panel" id="panel">
+        <h3 id="panel-title">点击地图放置标记</h3>
+        <div id="panel-form" style="display: none;">
+            <div class="field">
+                <label>场地名称</label>
+                <input type="text" id="ven-name" placeholder="如：西校区篮球场">
+            </div>
+            <div class="field">
+                <label>运动类型</label>
+                <select id="ven-sport">
+                    <option value="basketball">篮球</option>
+                    <option value="badminton">羽毛球</option>
+                    <option value="pingpong">乒乓球</option>
+                    <option value="football">足球</option>
+                    <option value="other">其他</option>
+                </select>
+            </div>
+            <div class="field">
+                <label>坐标 X% / Y%</label>
+                <input type="text" id="ven-coords" readonly>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn btn-save" onclick="confirmVenue()" style="flex: 1;">确认</button>
+                <button class="btn btn-clear" onclick="cancelVenue()" style="flex: 1;">取消</button>
+            </div>
+        </div>
+
+        <div class="venue-list" id="venue-list"></div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        var venues = [];
+        var mode = 'place';
+        var pendingPoint = null;
+        var selectedVenueIndex = -1;
+        var dragTargetIndex = -1;
+        var mapLoaded = false;
+
+        function loadMapFile(e) {
+            var file = e.target.files[0];
+            if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function(ev) {
+                var img = document.getElementById('map-image');
+                img.onload = function() {
+                    mapLoaded = true;
+                    document.getElementById('map-placeholder').style.display = 'none';
+                    img.style.display = 'block';
+                    setStatus('地图已加载: ' + file.name);
+                };
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function isMapReady() {
+            if (!mapLoaded) {
+                setStatus('请先选择地图文件');
+                return false;
+            }
+            return true;
+        }
+
+        function setMode(m) {
+            mode = m;
+            document.getElementById('btn-place').classList.toggle('active', m === 'place');
+            document.getElementById('btn-edit').classList.toggle('active', m === 'edit');
+            document.getElementById('btn-delete-mode').classList.toggle('active', m === 'delete');
+            cancelVenue();
+            selectedVenueIndex = -1;
+            renderAll();
+        }
+
+        document.getElementById('map-container').addEventListener('click', function(e) {
+            if (!isMapReady()) return;
+            if (e.target.closest('.map-point')) return;
+            var rect = document.getElementById('map-image').getBoundingClientRect();
+            var pctX = ((e.clientX - rect.left) / rect.width * 100).toFixed(2);
+            var pctY = ((e.clientY - rect.top) / rect.height * 100).toFixed(2);
+
+            if (mode === 'place') {
+                pendingPoint = { x: parseFloat(pctX), y: parseFloat(pctY) };
+                showForm(pendingPoint);
+            } else if (mode === 'delete') {
+                selectedVenueIndex = -1;
+                renderAll();
+            }
+        });
+
+        document.getElementById('map-container').addEventListener('mousemove', function(e) {
+            if (!mapLoaded) return;
+            var rect = document.getElementById('map-image').getBoundingClientRect();
+            var pctX = ((e.clientX - rect.left) / rect.width * 100).toFixed(2);
+            var pctY = ((e.clientY - rect.top) / rect.height * 100).toFixed(2);
+            document.getElementById('mouse-coords').textContent = e.clientX - rect.left + 'px, ' + e.clientY - rect.top + 'px';
+            document.getElementById('mouse-percent').textContent = pctX + '%, ' + pctY + '%';
+        });
+
+        function showForm(pt) {
+            document.getElementById('panel-title').textContent = '新场地';
+            document.getElementById('panel-form').style.display = '';
+            document.getElementById('ven-coords').value = '(' + pt.x.toFixed(2) + '%, ' + pt.y.toFixed(2) + '%)';
+            document.getElementById('ven-name').value = '';
+            document.getElementById('ven-name').focus();
+            renderPendingPoint(pt);
+        }
+
+        function renderPendingPoint(pt) {
+            var existing = document.querySelector('.fake-point');
+            if (existing) existing.remove();
+            if (!pt) return;
+            var el = document.createElement('div');
+            el.className = 'fake-point';
+            el.style.left = pt.x + '%';
+            el.style.top = pt.y + '%';
+            document.getElementById('map-container').appendChild(el);
+        }
+
+        function confirmVenue() {
+            var name = document.getElementById('ven-name').value.trim();
+            if (!name) { alert('请输入场地名称'); return; }
+            var sport = document.getElementById('ven-sport').value;
+
+            venues.push({
+                id: null,
+                name: name,
+                sportType: sport,
+                mapX: Math.round(pendingPoint.x * 100),
+                mapY: Math.round(pendingPoint.y * 100),
+                isNew: true
+            });
+            pendingPoint = null;
+            cancelVenue();
+            renderAll();
+            setStatus('场地 "' + name + '" 已添加（点击"保存到服务端"生效）');
+        }
+
+        function cancelVenue() {
+            pendingPoint = null;
+            document.getElementById('panel-title').textContent = '点击地图放置标记';
+            document.getElementById('panel-form').style.display = 'none';
+            var fp = document.querySelector('.fake-point');
+            if (fp) fp.remove();
+            renderAll();
+        }
+
+        document.getElementById('map-container').addEventListener('mousedown', function(e) {
+            if (!isMapReady()) return;
+            if (mode !== 'edit') return;
+            var pointEl = e.target.closest('.map-point');
+            if (!pointEl) return;
+            dragTargetIndex = parseInt(pointEl.getAttribute('data-index'));
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (dragTargetIndex === -1) return;
+            var rect = document.getElementById('map-image').getBoundingClientRect();
+            var pctX = ((e.clientX - rect.left) / rect.width * 100);
+            var pctY = ((e.clientY - rect.top) / rect.height * 100);
+            pctX = Math.max(0, Math.min(100, pctX));
+            pctY = Math.max(0, Math.min(100, pctY));
+            venues[dragTargetIndex].mapX = Math.round(pctX * 100);
+            venues[dragTargetIndex].mapY = Math.round(pctY * 100);
+            renderAll();
+        });
+
+        document.addEventListener('mouseup', function() {
+            if (dragTargetIndex !== -1) {
+                setStatus('坐标已更新');
+            }
+            dragTargetIndex = -1;
+        });
+
+        function selectVenue(index) {
+            if (mode === 'delete') {
+                var v = venues[index];
+                if (confirm('确定删除 "' + v.name + '" ？\n注意：已保存到数据库的场地仍需在数据库中手动删除。')) {
+                    venues.splice(index, 1);
+                    selectedVenueIndex = -1;
+                    renderAll();
+                    setStatus('已删除');
+                }
+                return;
+            }
+            selectedVenueIndex = (selectedVenueIndex === index) ? -1 : index;
+            if (selectedVenueIndex >= 0 && mode === 'place') {
+                pendingPoint = null;
+                cancelVenue();
+            }
+            renderAll();
+        }
+
+        function renderAll() {
+            var container = document.getElementById('map-container');
+            container.querySelectorAll('.map-point, .map-label, .fake-point').forEach(function(el) { el.remove(); });
+
+            venues.forEach(function(v, i) {
+                var px = v.mapX / 100;
+                var py = v.mapY / 100;
+
+                var point = document.createElement('div');
+                point.className = 'map-point' + (i === selectedVenueIndex ? ' selected' : '');
+                point.setAttribute('data-index', i);
+                point.style.left = px + '%';
+                point.style.top = py + '%';
+                point.title = v.name;
+                point.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    selectVenue(i);
+                });
+                container.appendChild(point);
+
+                var label = document.createElement('div');
+                label.className = 'map-label';
+                label.style.left = px + '%';
+                label.style.top = py + '%';
+                label.textContent = v.name;
+                container.appendChild(label);
+            });
+
+            if (pendingPoint) {
+                renderPendingPoint(pendingPoint);
+            }
+
+            document.getElementById('count-display').textContent = venues.length;
+
+            var listHtml = '';
+            venues.forEach(function(v, i) {
+                var sportLabels = { basketball: '🏀', badminton: '🏸', pingpong: '🏓', football: '⚽', other: '🎯' };
+                listHtml += '<div class="venue-item' + (i === selectedVenueIndex ? ' current' : '') + '" onclick="selectVenue(' + i + ')">' +
+                    '<span>' + (sportLabels[v.sportType] || '📍') + ' ' + v.name + '</span>' +
+                    '<span class="delete" onclick="event.stopPropagation(); selectVenue(' + i + '); if(mode===\'delete\')return; setMode(\'delete\'); selectVenue(' + i + ');">🗑</span>' +
+                '</div>';
+            });
+            if (listHtml === '') {
+                listHtml = '<div style="color:#666;font-size:13px;padding:12px;text-align:center;">暂无标记<br>点击地图放置第一个标记</div>';
+            }
+            document.getElementById('venue-list').innerHTML = listHtml;
+        }
+
+        function exportData() {
+            var exportVenues = venues.map(function(v) {
+                return { name: v.name, sportType: v.sportType, mapX: v.mapX, mapY: v.mapY };
+            });
+            var data = JSON.stringify(exportVenues, null, 2);
+            var blob = new Blob([data], { type: 'application/json' });
+            var a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'venues-export.json';
+            a.click();
+            setStatus('已导出 ' + venues.length + ' 个场地');
+        }
+
+        function saveToServer() {
+            if (venues.length === 0) {
+                setStatus('没有需要保存的场地');
+                return;
+            }
+            var payload = venues.map(function(v) {
+                return { name: v.name, sportType: v.sportType, mapX: v.mapX, mapY: v.mapY };
+            });
+            setStatus('正在保存 ' + venues.length + ' 个场地到服务器...');
+            API.venue.batchCoordinates(payload).then(function(res) {
+                if (res.code === 200) {
+                    setStatus('全部保存成功！(' + venues.length + ' 个场地)');
+                    loadFromDB();
+                } else {
+                    setStatus('保存失败: ' + (res.message || '未知错误'));
+                }
+            }).catch(function() {
+                setStatus('网络错误，保存失败');
+            });
+        }
+
+        function loadFromDB() {
+            setStatus('正在从服务器加载场地...');
+            API.venue.list().then(function(res) {
+                if (res.code === 200 && res.data) {
+                    var dbVenues = res.data;
+                    fetch('venues-export.json').then(function(r) { return r.json(); }).then(function(jsonData) {
+                        var merged = {};
+                        dbVenues.forEach(function(v) {
+                            merged[v.name] = {
+                                id: v.id, name: v.name, sportType: v.sportType,
+                                mapX: v.mapX || null, mapY: v.mapY || null, isNew: false
+                            };
+                        });
+                        jsonData.forEach(function(v) {
+                            if (merged[v.name]) {
+                                var existing = merged[v.name];
+                                if (existing.mapX == null) existing.mapX = v.mapX;
+                                if (existing.mapY == null) existing.mapY = v.mapY;
+                            } else {
+                                merged[v.name] = {
+                                    id: null, name: v.name, sportType: v.sportType,
+                                    mapX: v.mapX, mapY: v.mapY, isNew: true
+                                };
+                            }
+                        });
+                        venues = Object.values(merged);
+                        renderAll();
+                        setStatus('已加载 ' + venues.length + ' 个场地 (DB+JSON)');
+                    }).catch(function() {
+                        venues = dbVenues.map(function(v) {
+                            return { id: v.id, name: v.name, sportType: v.sportType,
+                                mapX: v.mapX || null, mapY: v.mapY || null, isNew: false };
+                        });
+                        renderAll();
+                        setStatus('已加载 ' + venues.length + ' 个场地 (仅DB, JSON文件未找到)');
+                    });
+                } else {
+                    fetch('venues-export.json').then(function(r) { return r.json(); }).then(function(jsonData) {
+                        venues = jsonData.map(function(v) {
+                            return { id: null, name: v.name, sportType: v.sportType,
+                                mapX: v.mapX, mapY: v.mapY, isNew: true };
+                        });
+                        renderAll();
+                        setStatus('已加载 ' + venues.length + ' 个场地 (仅JSON, 数据库无数据)');
+                    }).catch(function() {
+                        setStatus('加载失败：数据库和JSON均无数据');
+                    });
+                }
+            }).catch(function() {
+                setStatus('网络错误，加载失败');
+            });
+        }
+
+        function setStatus(msg) {
+            var el = document.getElementById('status-msg');
+            el.textContent = msg;
+            setTimeout(function() { el.textContent = ''; }, 4000);
+        }
+
+        loadFromDB();
+        renderAll();
+    </script>
+</body>
+</html>

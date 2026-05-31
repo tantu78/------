@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>消息通知 - 校园约球平台</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .notifications-container {
+            max-width: 800px;
+            margin: 32px auto;
+            padding: 0 24px;
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--airbnb-dark);
+        }
+        
+        .notification-card {
+            background: white;
+            border: 1px solid var(--airbnb-border);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .notification-card:hover {
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .notification-card.unread {
+            background: #fff9f9;
+            border-left: 3px solid var(--airbnb-red);
+        }
+        
+        .notification-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--airbnb-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: var(--airbnb-red);
+            flex-shrink: 0;
+        }
+        
+        .notification-content {
+            flex: 1;
+        }
+        
+        .notification-text {
+            font-size: 14px;
+            color: var(--airbnb-dark);
+            margin-bottom: 4px;
+            line-height: 1.5;
+        }
+        
+        .notification-time {
+            font-size: 12px;
+            color: var(--airbnb-gray);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 64px;
+            color: var(--airbnb-gray);
+        }
+        
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+        
+        .empty-state p {
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav>
+        <div class="container nav-content">
+            <a href="index.html" class="logo">
+                <i class="fa fa-basketball-ball"></i>
+                <span>校园约球</span>
+            </a>
+            
+            <div class="nav-right">
+                <a href="friends.html" class="user-avatar" style="display: inline-flex;">
+                    <i class="fa fa-users"></i>
+                </a>
+                <a href="notifications.html" class="notification-icon" style="background: var(--airbnb-red); color: white;">
+                    <i class="fa fa-bell"></i>
+                </a>
+                <a href="create-activity.html" class="btn-primary" style="padding: 8px 16px; font-size: 14px; display: none;">
+                    <i class="fa fa-plus mr-1"></i> 发起活动
+                </a>
+                <a href="profile.html" class="user-avatar" style="display: none;">
+                    <i class="fa fa-user" style="color: var(--airbnb-gray);"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="notifications-container">
+        <div class="page-header">
+            <h1 class="page-title">消息通知</h1>
+            <button class="btn-secondary" onclick="markAllRead()" style="padding: 8px 16px; font-size: 14px;">
+                <i class="fa fa-check"></i> 全部标记为已读
+            </button>
+        </div>
+        
+        <div id="notifications-list">
+            <div class="empty-state">
+                <i class="fa fa-spinner fa-spin"></i>
+                <p>加载中...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        function getCurrentUser() {
+            var userStr = localStorage.getItem('currentUser');
+            return userStr ? JSON.parse(userStr) : null;
+        }
+        
+        function loadNotifications() {
+            API.notification.list().then(function(res) {
+                if (res.code === 200 && res.data && res.data.length > 0) {
+                    var html = '';
+                    res.data.forEach(function(notification) {
+                        var iconClass = 'fa-bell';
+                        if (notification.type === 'friend_request') {
+                            iconClass = 'fa-user-plus';
+                        } else if (notification.type === 'friend_accept') {
+                            iconClass = 'fa-check-circle';
+                        } else if (notification.type === 'activity_join') {
+                            iconClass = 'fa-users';
+                        } else if (notification.type === 'activity_recommend') {
+                            iconClass = 'fa-calendar-check-o';
+                        }
+                        
+                        var unreadClass = notification.isRead ? '' : 'unread';
+                        
+                        html += '<div class="notification-card ' + unreadClass + '" onclick="handleNotification(' + notification.id + ', \'' + notification.type + '\', ' + notification.relatedId + ')">' +
+                            '<div class="notification-icon"><i class="fa ' + iconClass + '"></i></div>' +
+                            '<div class="notification-content">' +
+                            '<div class="notification-text">' + notification.content + '</div>' +
+                            '<div class="notification-time">' + formatTime(notification.createTime) + '</div>' +
+                            '</div>' +
+                            '</div>';
+                    });
+                    document.getElementById('notifications-list').innerHTML = html;
+                } else {
+                    document.getElementById('notifications-list').innerHTML = '<div class="empty-state"><i class="fa fa-bell-slash"></i><p>暂无通知</p></div>';
+                }
+            }).catch(function() {
+                document.getElementById('notifications-list').innerHTML = '<div class="empty-state"><i class="fa fa-exclamation-triangle"></i><p>加载失败</p></div>';
+            });
+        }
+        
+        function formatTime(timeStr) {
+            if (!timeStr) return '';
+            var date = new Date(timeStr);
+            var now = new Date();
+            var diff = now - date;
+            
+            if (diff < 60000) return '刚刚';
+            if (diff < 3600000) return Math.floor(diff / 60000) + '分钟前';
+            if (diff < 86400000) return Math.floor(diff / 3600000) + '小时前';
+            if (diff < 604800000) return Math.floor(diff / 86400000) + '天前';
+            
+            return date.toLocaleDateString('zh-CN');
+        }
+        
+        function handleNotification(id, type, relatedId) {
+            API.notification.markRead(id).then(function() {
+                if (type === 'activity_recommend' || type === 'activity_join') {
+                    window.location.href = 'activity-detail.html?id=' + relatedId;
+                } else if (type === 'friend_request') {
+                    window.location.href = 'friends.html';
+                }
+            });
+        }
+        
+        function markAllRead() {
+            API.notification.markAllRead().then(function(res) {
+                if (res.code === 200) {
+                    loadNotifications();
+                    if (window.opener) {
+                        window.opener.location.reload();
+                    }
+                }
+            });
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            var user = getCurrentUser();
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            loadNotifications();
+        });
+    </script>
+</body>
+</html>

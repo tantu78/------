@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员后台 - 校园约球平台</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .admin-container {
+            max-width: 1200px;
+            margin: 32px auto;
+            padding: 0 24px;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .admin-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--airbnb-dark);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: white;
+            border: 1px solid var(--airbnb-border);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .stat-card .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--airbnb-red);
+            margin-bottom: 4px;
+        }
+
+        .stat-card .stat-label {
+            color: var(--airbnb-gray);
+            font-size: 14px;
+        }
+
+        .tab-nav {
+            display: flex;
+            gap: 0;
+            border-bottom: 2px solid var(--airbnb-border);
+            margin-bottom: 24px;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            border: none;
+            background: none;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--airbnb-gray);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            color: var(--airbnb-red);
+            border-bottom-color: var(--airbnb-red);
+        }
+
+        .tab-btn:hover {
+            color: var(--airbnb-dark);
+        }
+
+        .tab-content {
+            display: none;
+            background: white;
+            border: 1px solid var(--airbnb-border);
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--airbnb-border);
+            font-size: 14px;
+        }
+
+        .data-table th {
+            font-weight: 600;
+            color: var(--airbnb-dark);
+            background: var(--airbnb-bg);
+        }
+
+        .data-table td {
+            color: var(--airbnb-dark);
+        }
+
+        .data-table tr:hover td {
+            background: rgba(255, 90, 95, 0.03);
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            margin-right: 4px;
+        }
+
+        .action-btn.edit {
+            background: var(--airbnb-teal);
+            color: white;
+        }
+
+        .action-btn.delete {
+            background: var(--airbnb-red);
+            color: white;
+        }
+
+        .action-btn:hover {
+            opacity: 0.9;
+        }
+
+        .badge-role {
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-admin {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-user {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--airbnb-border);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--airbnb-red);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 64px;
+            color: var(--airbnb-gray);
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="container nav-content">
+            <a href="index.html" class="logo">
+                <i class="fa fa-basketball-ball"></i>
+                <span>校园约球</span>
+            </a>
+            <div class="nav-right">
+                <a href="index.html" class="btn-secondary" style="padding: 8px 16px; font-size: 14px;">返回首页</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1 class="admin-title">管理员后台</h1>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="stat-users">-</div>
+                <div class="stat-label">注册用户</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="stat-activities">-</div>
+                <div class="stat-label">活动总数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="stat-venues">-</div>
+                <div class="stat-label">运动场地</div>
+            </div>
+        </div>
+
+        <div class="tab-nav">
+            <button class="tab-btn active" onclick="switchTab('users')">
+                <i class="fa fa-users"></i> 用户管理
+            </button>
+            <button class="tab-btn" onclick="switchTab('activities')">
+                <i class="fa fa-calendar"></i> 活动管理
+            </button>
+            <button class="tab-btn" onclick="switchTab('venues')">
+                <i class="fa fa-map-marker"></i> 场地管理
+            </button>
+        </div>
+
+        <div class="tab-content active" id="tab-users">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="margin: 0;">用户列表</h3>
+            </div>
+            <div style="overflow-x: auto;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>用户名</th>
+                            <th>手机号</th>
+                            <th>偏好运动</th>
+                            <th>角色</th>
+                            <th>注册时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body">
+                        <tr><td colspan="7" class="empty-state">加载中...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-content" id="tab-activities">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="margin: 0;">活动列表</h3>
+            </div>
+            <div style="overflow-x: auto;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>标题</th>
+                            <th>运动类型</th>
+                            <th>参与/最大</th>
+                            <th>开始时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="activities-table-body">
+                        <tr><td colspan="6" class="empty-state">加载中...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-content" id="tab-venues">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="margin: 0;">场地列表</h3>
+                <button class="btn-primary" onclick="showAddVenueForm()" style="padding: 8px 16px; font-size: 14px;">
+                    <i class="fa fa-plus"></i> 添加场地
+                </button>
+            </div>
+            <div id="venue-form-area" style="display:none; margin-bottom: 16px; padding: 20px; background: var(--airbnb-bg); border-radius: 8px;">
+                <h4 id="venue-form-title" style="margin-bottom: 16px;">添加场地</h4>
+                <input type="hidden" id="venue-edit-id">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>场地名称 <span style="color:var(--airbnb-red)">*</span></label>
+                        <input type="text" class="form-input" id="venue-name" placeholder="例如：西校区篮球场">
+                    </div>
+                    <div class="form-group">
+                        <label>运动类型</label>
+                        <select class="form-input" id="venue-sport-type">
+                            <option value="basketball">篮球</option>
+                            <option value="badminton">羽毛球</option>
+                            <option value="pingpong">乒乓球</option>
+                            <option value="football">足球</option>
+                            <option value="other">其他</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>地图坐标X (%)</label>
+                        <input type="number" class="form-input" id="venue-map-x" min="0" max="100" placeholder="0-100">
+                    </div>
+                    <div class="form-group">
+                        <label>地图坐标Y (%)</label>
+                        <input type="number" class="form-input" id="venue-map-y" min="0" max="100" placeholder="0-100">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>容纳人数</label>
+                    <input type="number" class="form-input" id="venue-capacity" min="1" placeholder="场地容纳人数">
+                </div>
+                <div class="form-group">
+                    <label>场地介绍</label>
+                    <textarea class="form-input" id="venue-description" rows="2" placeholder="场地描述..."></textarea>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn-primary" onclick="saveVenue()" style="padding: 8px 16px; font-size: 14px;">保存</button>
+                    <button class="btn-secondary" onclick="cancelVenueForm()" style="padding: 8px 16px; font-size: 14px;">取消</button>
+                </div>
+            </div>
+            <div style="overflow-x: auto;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>名称</th>
+                            <th>运动类型</th>
+                            <th>容纳人数</th>
+                            <th>坐标</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="venues-table-body">
+                        <tr><td colspan="6" class="empty-state">加载中...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        function getCurrentUser() {
+            var userStr = localStorage.getItem('currentUser');
+            return userStr ? JSON.parse(userStr) : null;
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(function(btn) {
+                btn.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-content').forEach(function(content) {
+                content.classList.remove('active');
+            });
+            event.target.closest('.tab-btn').classList.add('active');
+            document.getElementById('tab-' + tab).classList.add('active');
+            
+            if (tab === 'users') loadUsers();
+            if (tab === 'activities') loadActivities();
+            if (tab === 'venues') loadVenues();
+        }
+
+        function loadStats() {
+            fetch('/backend/api/admin/stats', { credentials: 'include' }).then(function(res) {
+                return res.json();
+            }).then(function(res) {
+                if (res.code === 200 && res.data) {
+                    document.getElementById('stat-users').textContent = res.data.userCount || 0;
+                    document.getElementById('stat-activities').textContent = res.data.activityCount || 0;
+                    document.getElementById('stat-venues').textContent = res.data.venueCount || 0;
+                }
+            }).catch(function() {});
+        }
+
+        function loadUsers() {
+            fetch('/backend/api/admin/users', { credentials: 'include' }).then(function(res) {
+                return res.json();
+            }).then(function(res) {
+                if (res.code === 403) {
+                    document.getElementById('users-table-body').innerHTML = '<tr><td colspan="7" class="empty-state">需要管理员权限</td></tr>';
+                    return;
+                }
+                if (res.code === 200 && res.data) {
+                    var html = '';
+                    res.data.forEach(function(user) {
+                        var roleBadge = user.role === 'admin' ? '<span class="badge-role badge-admin">管理员</span>' : '<span class="badge-role badge-user">用户</span>';
+                        html += '<tr>' +
+                            '<td>' + user.id + '</td>' +
+                            '<td>' + user.username + '</td>' +
+                            '<td>' + (user.phone || '-') + '</td>' +
+                            '<td>' + (user.favoriteSport || '-') + '</td>' +
+                            '<td>' + roleBadge + '</td>' +
+                            '<td>' + (user.createTime ? new Date(user.createTime).toLocaleDateString('zh-CN') : '-') + '</td>' +
+                            '<td>' +
+                            '<button class="action-btn edit" onclick="toggleUserRole(' + user.id + ', \'' + user.role + '\')">切换角色</button>' +
+                            '<button class="action-btn delete" onclick="deleteUser(' + user.id + ')">删除</button>' +
+                            '</td>' +
+                            '</tr>';
+                    });
+                    document.getElementById('users-table-body').innerHTML = html;
+                }
+            }).catch(function() {
+                document.getElementById('users-table-body').innerHTML = '<tr><td colspan="7" class="empty-state">加载失败</td></tr>';
+            });
+        }
+
+        function toggleUserRole(id, currentRole) {
+            var newRole = currentRole === 'admin' ? 'user' : 'admin';
+            fetch('/backend/api/admin/user/' + id, {
+                method: 'PUT',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ role: newRole })
+            }).then(function(res) { return res.json(); }).then(function(res) {
+                if (res.code === 200) {
+                    loadUsers();
+                } else {
+                    alert(res.message || '操作失败');
+                }
+            });
+        }
+
+        function deleteUser(id) {
+            if (!confirm('确定删除该用户？')) return;
+            fetch('/backend/api/admin/user/' + id, {
+                method: 'DELETE',
+                credentials: 'include'
+            }).then(function(res) { return res.json(); }).then(function(res) {
+                if (res.code === 200) {
+                    loadUsers();
+                    loadStats();
+                } else {
+                    alert(res.message || '删除失败');
+                }
+            });
+        }
+
+        function loadActivities() {
+            fetch('/backend/api/admin/activities', { credentials: 'include' }).then(function(res) {
+                return res.json();
+            }).then(function(res) {
+                if (res.code === 403) {
+                    document.getElementById('activities-table-body').innerHTML = '<tr><td colspan="6" class="empty-state">需要管理员权限</td></tr>';
+                    return;
+                }
+                if (res.code === 200 && res.data) {
+                    var html = '';
+                    res.data.forEach(function(a) {
+                        html += '<tr>' +
+                            '<td>' + a.id + '</td>' +
+                            '<td>' + a.title + '</td>' +
+                            '<td>' + (a.sportType || '-') + '</td>' +
+                            '<td>' + (a.currentParticipants || 0) + '/' + (a.maxParticipants || 0) + '</td>' +
+                            '<td>' + (a.startTime ? new Date(a.startTime).toLocaleString('zh-CN') : '-') + '</td>' +
+                            '<td><button class="action-btn delete" onclick="deleteActivity(' + a.id + ')">删除</button></td>' +
+                            '</tr>';
+                    });
+                    document.getElementById('activities-table-body').innerHTML = html || '<tr><td colspan="6" class="empty-state">暂无活动</td></tr>';
+                }
+            }).catch(function() {
+                document.getElementById('activities-table-body').innerHTML = '<tr><td colspan="6" class="empty-state">加载失败</td></tr>';
+            });
+        }
+
+        function deleteActivity(id) {
+            if (!confirm('确定删除该活动？')) return;
+            fetch('/backend/api/admin/activity/' + id, {
+                method: 'DELETE',
+                credentials: 'include'
+            }).then(function(res) { return res.json(); }).then(function(res) {
+                if (res.code === 200) {
+                    loadActivities();
+                    loadStats();
+                } else {
+                    alert(res.message || '删除失败');
+                }
+            });
+        }
+
+        function loadVenues() {
+            API.venue.list().then(function(res) {
+                if (res.code === 200 && res.data) {
+                    var html = '';
+                    res.data.forEach(function(v) {
+                        html += '<tr>' +
+                            '<td>' + v.id + '</td>' +
+                            '<td>' + v.name + '</td>' +
+                            '<td>' + (v.sportType || '-') + '</td>' +
+                            '<td>' + (v.capacity || '-') + '</td>' +
+                            '<td>(' + (v.mapX || '-') + ', ' + (v.mapY || '-') + ')</td>' +
+                            '<td>' +
+                            '<button class="action-btn edit" onclick="editVenue(' + v.id + ')">编辑</button>' +
+                            '<button class="action-btn delete" onclick="deleteVenue(' + v.id + ')">删除</button>' +
+                            '</td>' +
+                            '</tr>';
+                    });
+                    document.getElementById('venues-table-body').innerHTML = html || '<tr><td colspan="6" class="empty-state">暂无场地</td></tr>';
+                }
+            }).catch(function() {
+                document.getElementById('venues-table-body').innerHTML = '<tr><td colspan="6" class="empty-state">加载失败</td></tr>';
+            });
+        }
+
+        function showAddVenueForm() {
+            document.getElementById('venue-form-area').style.display = 'block';
+            document.getElementById('venue-form-title').textContent = '添加场地';
+            document.getElementById('venue-edit-id').value = '';
+            document.getElementById('venue-name').value = '';
+            document.getElementById('venue-sport-type').value = 'basketball';
+            document.getElementById('venue-map-x').value = '';
+            document.getElementById('venue-map-y').value = '';
+            document.getElementById('venue-capacity').value = '';
+            document.getElementById('venue-description').value = '';
+        }
+
+        function editVenue(id) {
+            API.venue.list().then(function(res) {
+                if (res.code === 200 && res.data) {
+                    var venue = res.data.find(function(v) { return v.id === id; });
+                    if (!venue) return;
+                    
+                    document.getElementById('venue-form-area').style.display = 'block';
+                    document.getElementById('venue-form-title').textContent = '编辑场地';
+                    document.getElementById('venue-edit-id').value = venue.id;
+                    document.getElementById('venue-name').value = venue.name || '';
+                    document.getElementById('venue-sport-type').value = venue.sportType || 'basketball';
+                    document.getElementById('venue-map-x').value = venue.mapX || '';
+                    document.getElementById('venue-map-y').value = venue.mapY || '';
+                    document.getElementById('venue-capacity').value = venue.capacity || '';
+                    document.getElementById('venue-description').value = venue.description || '';
+                }
+            });
+        }
+
+        function cancelVenueForm() {
+            document.getElementById('venue-form-area').style.display = 'none';
+        }
+
+        function saveVenue() {
+            var id = document.getElementById('venue-edit-id').value;
+            var name = document.getElementById('venue-name').value.trim();
+            if (!name) {
+                alert('请输入场地名称');
+                return;
+            }
+
+            var venueData = {
+                name: name,
+                sportType: document.getElementById('venue-sport-type').value,
+                mapX: parseInt(document.getElementById('venue-map-x').value) || null,
+                mapY: parseInt(document.getElementById('venue-map-y').value) || null,
+                capacity: parseInt(document.getElementById('venue-capacity').value) || null,
+                description: document.getElementById('venue-description').value.trim() || null
+            };
+
+            var url = id ? '/backend/api/admin/venue/' + id : '/backend/api/admin/venue';
+            var method = id ? 'PUT' : 'POST';
+
+            fetch(url, {
+                method: method,
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(venueData)
+            }).then(function(res) { return res.json(); }).then(function(res) {
+                if (res.code === 200) {
+                    cancelVenueForm();
+                    loadVenues();
+                    loadStats();
+                } else {
+                    alert(res.message || '保存失败');
+                }
+            }).catch(function() {
+                alert('网络错误');
+            });
+        }
+
+        function deleteVenue(id) {
+            if (!confirm('确定删除该场地？')) return;
+            fetch('/backend/api/admin/venue/' + id, {
+                method: 'DELETE',
+                credentials: 'include'
+            }).then(function(res) { return res.json(); }).then(function(res) {
+                if (res.code === 200) {
+                    loadVenues();
+                    loadStats();
+                } else {
+                    alert(res.message || '删除失败');
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var user = getCurrentUser();
+            if (!user) {
+                window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.href);
+                return;
+            }
+            
+            loadStats();
+            loadUsers();
+        });
+    </script>
+</body>
+</html>

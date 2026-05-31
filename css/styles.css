@@ -1,0 +1,450 @@
+/* 全局样式 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --airbnb-red: #FF5A5F;
+    --airbnb-teal: #00A699;
+    --airbnb-orange: #FC642D;
+    --airbnb-dark: #484848;
+    --airbnb-gray: #767676;
+    --airbnb-border: #EBEBEB;
+    --airbnb-bg: #F7F7F7;
+    --airbnb-white: #FFFFFF;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    color: var(--airbnb-dark);
+    line-height: 1.6;
+    background-color: var(--airbnb-white);
+}
+
+/* 通用组件样式 */
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+.btn-primary {
+    background-color: var(--airbnb-red);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 500;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #e54e53;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255, 90, 95, 0.2);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-secondary {
+    background-color: white;
+    color: var(--airbnb-dark);
+    border: 1px solid var(--airbnb-border);
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 500;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background-color: var(--airbnb-bg);
+    border-color: var(--airbnb-gray);
+}
+
+.card {
+    background: white;
+    border: 1px solid var(--airbnb-border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+}
+
+/* 导航栏样式 */
+nav {
+    height: 64px;
+    border-bottom: 1px solid var(--airbnb-border);
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 100;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.nav-content {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 20px;
+    color: var(--airbnb-red);
+    text-decoration: none;
+}
+
+.search-bar {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--airbnb-border);
+    border-radius: 24px;
+    padding: 10px 16px;
+    width: 400px;
+    gap: 8px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.search-bar:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.search-bar input {
+    border: none;
+    outline: none;
+    flex: 1;
+    font-size: 14px;
+}
+
+.search-bar input::placeholder {
+    color: var(--airbnb-gray);
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.notification-icon {
+    position: relative;
+    font-size: 20px;
+    color: var(--airbnb-gray);
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.notification-icon:hover {
+    color: var(--airbnb-red);
+}
+
+.notification-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: var(--airbnb-red);
+    color: white;
+    font-size: 10px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--airbnb-bg);
+    border: 1px solid var(--airbnb-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+}
+
+.user-avatar:hover {
+    border-color: var(--airbnb-red);
+}
+
+/* 筛选栏样式 */
+.filter-bar {
+    border-bottom: 1px solid var(--airbnb-border);
+    padding: 16px 0;
+}
+
+.filter-content {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+}
+
+.filter-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid transparent;
+    color: var(--airbnb-gray);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.filter-item:hover {
+    color: var(--airbnb-dark);
+    border-color: var(--airbnb-border);
+}
+
+.filter-item.active {
+    color: var(--airbnb-red);
+    border-color: var(--airbnb-red);
+    font-weight: 500;
+}
+
+.filter-item i {
+    font-size: 20px;
+}
+
+.filter-item span {
+    font-size: 12px;
+}
+
+.filter-right {
+    margin-left: auto;
+}
+
+/* Hero区域样式 */
+.hero {
+    margin: 32px 0;
+    border-radius: 12px;
+    overflow: hidden;
+    height: 320px;
+    background: linear-gradient(135deg, var(--airbnb-red) 0%, var(--airbnb-orange) 100%);
+    position: relative;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 64px;
+    color: white;
+}
+
+.hero h1 {
+    font-size: 48px;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+.hero p {
+    font-size: 20px;
+    margin-bottom: 32px;
+    opacity: 0.95;
+}
+
+.hero .btn-primary {
+    background: white;
+    color: var(--airbnb-red);
+    width: fit-content;
+}
+
+.hero .btn-primary:hover {
+    background: rgba(255, 255, 255, 0.95);
+}
+
+/* 活动列表样式 */
+.section-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 48px 0 24px;
+}
+
+.activities-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+    margin-bottom: 48px;
+}
+
+.activity-card {
+    text-decoration: none;
+    color: inherit;
+}
+
+.activity-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    position: relative;
+}
+
+.activity-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: var(--airbnb-red);
+    color: white;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.activity-badge.new {
+    background: var(--airbnb-teal);
+}
+
+.activity-badge.upcoming {
+    background: var(--airbnb-orange);
+}
+
+.activity-info {
+    padding: 16px;
+}
+
+.activity-time {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--airbnb-gray);
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.activity-title {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.activity-location {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--airbnb-gray);
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+
+.activity-location i {
+    color: var(--airbnb-red);
+}
+
+.activity-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    font-size: 14px;
+}
+
+.activity-participants {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--airbnb-teal);
+    font-weight: 500;
+}
+
+.activity-organizer {
+    color: var(--airbnb-gray);
+}
+
+.activity-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.activity-actions .btn-primary {
+    flex: 1;
+    padding: 10px 0;
+    font-size: 14px;
+}
+
+.activity-actions .btn-secondary {
+    padding: 10px 12px;
+    font-size: 14px;
+}
+
+/* 页脚样式 */
+footer {
+    background: var(--airbnb-bg);
+    border-top: 1px solid var(--airbnb-border);
+    padding: 48px 0;
+    margin-top: 64px;
+}
+
+.footer-content {
+    text-align: center;
+    color: var(--airbnb-gray);
+    font-size: 14px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .search-bar {
+        display: none;
+    }
+    
+    .hero {
+        height: 240px;
+    }
+    
+    .hero h1 {
+        font-size: 32px;
+    }
+    
+    .hero p {
+        font-size: 16px;
+    }
+    
+    .hero-content {
+        padding: 0 24px;
+    }
+    
+    .activities-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .filter-content {
+        overflow-x: auto;
+        padding-bottom: 8px;
+    }
+}
