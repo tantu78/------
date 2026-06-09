@@ -106,6 +106,47 @@ public class NotificationService {
         return Result.success();
     }
 
+    public void createActivityAuditResult(Long activityId, String title, String auditStatus, String remark) {
+        Activity activity = activityRepository.findById(activityId).orElse(null);
+        if (activity == null) return;
+
+        String content;
+        if ("published".equals(auditStatus)) {
+            content = "你的活动《" + title + "》已审核通过";
+        } else if ("rejected".equals(auditStatus)) {
+            content = "你的活动《" + title + "》已被驳回，原因：" + (remark != null ? remark : "");
+        } else if ("offline".equals(auditStatus)) {
+            content = "你的活动《" + title + "》已被下架，原因：" + (remark != null ? remark : "");
+        } else {
+            return;
+        }
+
+        Notification notification = new Notification();
+        notification.setUserId(activity.getOrganizerId());
+        notification.setType("activity_audit");
+        notification.setContent(content);
+        notification.setRelatedId(activityId);
+        notificationRepository.save(notification);
+    }
+
+    public void createActivityStartReminder(Long activityId, String title, Long userId) {
+        Notification notification = new Notification();
+        notification.setUserId(userId);
+        notification.setType("activity_start");
+        notification.setContent("活动《" + title + "》即将开始");
+        notification.setRelatedId(activityId);
+        notificationRepository.save(notification);
+    }
+
+    public void createActivityEndReminder(Long activityId, String title, Long userId) {
+        Notification notification = new Notification();
+        notification.setUserId(userId);
+        notification.setType("activity_end");
+        notification.setContent("活动《" + title + "》已结束，快来评价吧");
+        notification.setRelatedId(activityId);
+        notificationRepository.save(notification);
+    }
+
     public static class Result<T> {
         private int code;
         private String message;

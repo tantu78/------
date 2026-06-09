@@ -3,17 +3,24 @@ package com.campus.ball.controller;
 import com.campus.ball.auth.AuthContext;
 import com.campus.ball.common.Result;
 import com.campus.ball.entity.Activity;
+import com.campus.ball.entity.ActivityAuditLog;
 import com.campus.ball.entity.User;
 import com.campus.ball.entity.Venue;
 import com.campus.ball.repository.ActivityRepository;
 import com.campus.ball.repository.UserRepository;
 import com.campus.ball.repository.VenueRepository;
+import com.campus.ball.service.ActivityService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -84,15 +91,6 @@ public class AdminController {
         return Result.success("用户已删除");
     }
 
-    @GetMapping("/activities")
-    @ApiOperation("获取所有活动")
-    public Result<List<Activity>> getAllActivities() {
-        Result<?> check = requireAdmin();
-        if (check != null) return (Result<List<Activity>>) check;
-
-        return Result.success(activityRepository.findAll());
-    }
-
     @DeleteMapping("/activity/{id}")
     @ApiOperation("删除活动")
     public Result<?> deleteActivity(@PathVariable Long id) {
@@ -130,6 +128,8 @@ public class AdminController {
         if (update.getSportType() != null) venue.setSportType(update.getSportType());
         if (update.getMapX() != null) venue.setMapX(update.getMapX());
         if (update.getMapY() != null) venue.setMapY(update.getMapY());
+        if (update.getCapacity() != null) venue.setCapacity(update.getCapacity());
+        if (update.getDescription() != null) venue.setDescription(update.getDescription());
 
         venueRepository.save(venue);
         return Result.success("场地已更新");
@@ -166,4 +166,100 @@ public class AdminController {
 
         return Result.success(stats);
     }
+
+    @GetMapping("/activities")
+    @ApiOperation("管理员获取活动列表（可按审核状态过滤）")
+    public Result<Page<Activity>> getAdminActivities(
+            @RequestParam(required = false) String auditStatus,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        Result<?> check = requireAdmin();
+        if (check != null) return (Result<Page<Activity>>) check;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createTime"));
+        Page<Activity> activities;
+        if (auditStatus != null && !auditStatus.isEmpty()) {
+            activities = activityRepository.findByAuditStatus(auditStatus, pageable);
+        } else {
+            activities = activityRepository.findAll(pageable);
+        }
+
+        // 填充信息
+        activities.getContent().forEach(a -> {
+            if (a.getVenueId() != null) {
+                venueRepository.findById(a.getVenueId()).ifPresent(v -> a.setVenueName(v.getName()));
+            }
+            if (a.getOrganizerId() != null) {
+                User u = userRepository.findById(a.getOrganizerId()).orElse(null);
+                if (u != null) {
+                    a.setOrganizerName(u.getUsername());
+                }
+            }
+        });
+
+        return Result.success(activities);
+    }
+
+    @GetMapping("/activity/{id}")
+    @ApiOperation("获取活动详情（管理员）")
+    public Result<Activity> getAdminActivityDetail(@PathVariable Long id) {
+        Result<?> check = requireAdmin();
+        if (check != null) return (Result<Activity>) check;
+
+        Activity activity = activityRepository.findById(id).orElse(null);
+        if (activity == null) return Result.error("活动不存在");
+
+        if (activity.getVenueId() != null) {
+            venueRepository.findById(activity.getVenueId()).ifPresent(v -> activity.setVenueName(v.getName()));
+        }
+        if (activity.getOrganizerId() != null) {
+            User u = userRepository.findById(activity.getOrganizerId()).orElse(null);
+            if (u != null) {
+                activity.setOrganizerName(u.getUsername());
+            }
+        }
+
+        return Result.success(activity);
+    }
+
+    @GetMapping("/activity/{id}/logs")
+    @ApiOperation("获取活动审核日志")
+    public Result<List<ActivityAuditLog>> getAuditLogs(@PathVariable Long id) {
+        Result<?> check = requireAdmin();
+        if (check != null) return (Result<List<ActivityAuditLog>>) check;
+
+        return activityService.getAuditLogs(id);
+    }
+
+    @PostMapping("/activity/{id}/approve")
+    @ApiOperation("审核通过活动")
+    public Result<Activity> approveActivity(@PathVariable Long id) {
+        Result<?> check = requireAdmin();
+        if (check != null) return (Result<Activity>) check;
+
+        return activityService.approveActivity(id);
+    }
+
+    @PostMapping("/activity/{id}/reject")
+    @ApiOperation("驳回活动")
+    public Result<Activity> rejectActivity(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        Result<?> check = requireAdmin();
+        if (check != null) return (Result<Activity>) check;
+
+        String reason = body.get("reason");
+        return activityService.rejectActivity(id, reason);
+    }
+
+    @PostMapping("/activity/{id}/offline")
+    @ApiOperation("下架活动")
+    public Result<Activity> offlineActivity(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        Result<?> check = requireAdmin();
+        if (check != null) return (Result<Activity>) check;
+
+        String reason = body.get("reason");
+        return activityService.offlineActivity(id, reason);
+    }
+
+    @Autowired
+    private ActivityService activityService;
 }

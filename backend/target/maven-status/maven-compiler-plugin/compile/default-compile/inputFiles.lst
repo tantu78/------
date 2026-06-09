@@ -6,6 +6,7 @@ e:\设计\WEB大作业\backend\src\main\java\com\campus\ball\CampusBallApplicati
 e:\设计\WEB大作业\backend\src\main\java\com\campus\ball\repository\VenueRepository.java
 e:\设计\WEB大作业\backend\src\main\java\com\campus\ball\entity\FriendRelation.java
 e:\设计\WEB大作业\backend\src\main\java\com\campus\ball\service\ActivityService.java
+e:\设计\WEB大作业\backend\src\main\java\com\campus\ball\repository\ActivityAuditLogRepository.java
 e:\设计\WEB大作业\backend\src\main\java\com\campus\ball\controller\EvaluationController.java
 e:\设计\WEB大作业\backend\src\main\java\com\campus\ball\repository\EvaluationRepository.java
 e:\设计\WEB大作业\backend\src\main\java\com\campus\ball\common\Result.java
@@ -23,6 +24,7 @@ e:\设计\WEB大作业\backend\src\main\java\com\campus\ball\controller\FileUplo
 e:\设计\WEB大作业\backend\src\main\java\com\campus\ball\entity\Activity.java
 e:\设计\WEB大作业\backend\src\main\java\com\campus\ball\repository\UserRepository.java
 e:\设计\WEB大作业\backend\src\main\java\com\campus\ball\controller\VenueController.java
+e:\设计\WEB大作业\backend\src\main\java\com\campus\ball\entity\ActivityAuditLog.java
 e:\设计\WEB大作业\backend\src\main\java\com\campus\ball\repository\ActivityRecommendRepository.java
 e:\设计\WEB大作业\backend\src\main\java\com\campus\ball\controller\FriendController.java
 e:\设计\WEB大作业\backend\src\main\java\com\campus\ball\service\FriendService.java
@@ -37,4 +39,5 @@ e:\设计\WEB大作业\backend\src\main\java\com\campus\ball\entity\Venue.java
 e:\设计\WEB大作业\backend\src\main\java\com\campus\ball\entity\Notification.java
 e:\设计\WEB大作业\backend\src\main\java\com\campus\ball\repository\ActivityParticipantRepository.java
 e:\设计\WEB大作业\backend\src\main\java\com\campus\ball\entity\ActivityParticipant.java
+e:\设计\WEB大作业\backend\src\main\java\com\campus\ball\job\ActivityReminderJob.java
 e:\设计\WEB大作业\backend\src\main\java\com\campus\ball\common\ResultCode.java

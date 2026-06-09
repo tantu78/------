@@ -1,5 +1,6 @@
 com\campus\ball\controller\NotificationController.class
 com\campus\ball\entity\Activity.class
+com\campus\ball\repository\ActivityAuditLogRepository.class
 com\campus\ball\auth\AuthContext.class
 com\campus\ball\CampusBallApplication.class
 com\campus\ball\entity\ActivityEvaluation.class
@@ -7,6 +8,7 @@ com\campus\ball\controller\FriendController.class
 com\campus\ball\entity\Venue.class
 com\campus\ball\controller\UserController.class
 com\campus\ball\entity\FriendRelation.class
+com\campus\ball\job\ActivityReminderJob.class
 com\campus\ball\common\Result.class
 com\campus\ball\entity\ActivityRecommend.class
 com\campus\ball\controller\EvaluationController.class
@@ -18,6 +20,7 @@ com\campus\ball\service\UserService.class
 com\campus\ball\config\StaticResourceConfig.class
 com\campus\ball\entity\ActivityParticipant.class
 com\campus\ball\repository\FriendRelationRepository.class
+com\campus\ball\entity\ActivityAuditLog.class
 com\campus\ball\repository\EvaluationRepository.class
 com\campus\ball\repository\ActivityRepository.class
 com\campus\ball\controller\VenueController.class

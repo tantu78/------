@@ -16,9 +16,21 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
     List<Activity> findByOrganizerId(Long organizerId);
     List<Activity> findByStartTimeAfter(LocalDateTime time);
     List<Activity> findBySportTypeAndStartTimeAfter(String sportType, LocalDateTime time);
-    
+
     Page<Activity> findByStartTimeAfter(LocalDateTime time, Pageable pageable);
     Page<Activity> findBySportTypeAndStartTimeAfter(String sportType, LocalDateTime time, Pageable pageable);
     Page<Activity> findByVenueIdAndStartTimeAfter(Long venueId, LocalDateTime time, Pageable pageable);
     List<Activity> findBySportTypeInAndStartTimeAfter(List<String> sportTypes, LocalDateTime time);
+
+    Page<Activity> findByAuditStatusAndStartTimeAfter(String auditStatus, LocalDateTime time, Pageable pageable);
+    Page<Activity> findBySportTypeAndAuditStatusAndStartTimeAfter(String sportType, String auditStatus, LocalDateTime time, Pageable pageable);
+    Page<Activity> findByAuditStatus(String auditStatus, Pageable pageable);
+    List<Activity> findByAuditStatus(String auditStatus);
+    List<Activity> findByAuditStatusNot(String auditStatus);
+
+    List<Activity> findByAuditStatusAndStartTimeBetween(String auditStatus, LocalDateTime startTimeStart, LocalDateTime startTimeEnd);
+    List<Activity> findByAuditStatusAndEndTimeBetween(String auditStatus, LocalDateTime endTimeStart, LocalDateTime endTimeEnd);
+
+    List<Activity> findBySportTypeInAndAuditStatusAndStartTimeAfter(List<String> sportTypes, String auditStatus, LocalDateTime time);
+    List<Activity> findByVenueIdAndAuditStatusAndStartTimeAfter(Long venueId, String auditStatus, LocalDateTime time);
 }

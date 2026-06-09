@@ -120,6 +120,9 @@
         <button class="btn btn-export" onclick="exportData()">
             <i class="fa fa-download"></i> 导出 JSON
         </button>
+        <button class="btn btn-save" onclick="window.location.href='admin.html'" style="background: #4a4a6a;">
+            <i class="fa fa-arrow-left"></i> 返回后台
+        </button>
         <button class="btn btn-save" onclick="saveToServer()">
             <i class="fa fa-cloud-upload"></i> 保存到服务端
         </button>
@@ -175,6 +178,7 @@
     </div>
 
     <script src="js/api.js"></script>
+    <script src="js/main.js"></script>
     <script>
         var venues = [];
         var mode = 'place';
@@ -479,8 +483,20 @@
             setTimeout(function() { el.textContent = ''; }, 4000);
         }
 
-        loadFromDB();
-        renderAll();
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth().then(function(user) {
+                if (!user) {
+                    window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.href);
+                    return;
+                }
+                if (user.role !== 'admin') {
+                    window.location.href = 'index.html';
+                    return;
+                }
+                loadFromDB();
+                renderAll();
+            });
+        });
     </script>
 </body>
 </html>

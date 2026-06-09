@@ -26,12 +26,27 @@ public class AuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         String token = getCookieValue(request, COOKIE_NAME);
+        User user = null;
         if (token != null && !token.isEmpty()) {
-            User user = tokenStore.getUser(token);
+            user = tokenStore.getUser(token);
             if (user != null) {
                 AuthContext.setUser(user);
             }
         }
+
+        String uri = request.getRequestURI();
+        String ctx = request.getContextPath();
+        if (uri.endsWith("/admin.html") || uri.endsWith("/admin-venues.html")) {
+            if (user == null) {
+                response.sendRedirect(ctx + "/login.html?redirect=" + java.net.URLEncoder.encode(uri, "UTF-8"));
+                return;
+            }
+            if (!"admin".equals(user.getRole())) {
+                response.sendRedirect(ctx + "/index.html");
+                return;
+            }
+        }
+
         try {
             filterChain.doFilter(request, response);
         } finally {

@@ -31,12 +31,12 @@ public class UserController {
     @ApiOperation("用户登录")
     public Result<User> login(@RequestParam String username, @RequestParam String password,
                               HttpServletResponse response) {
-        String token = userService.login(username, password);
-        if (token == null) {
+        User user = userService.findByCredentials(username, password);
+        if (user == null) {
             return Result.error("用户名或密码错误");
         }
+        String token = userService.login(username, password);
         AuthFilter.setCookie(response, token);
-        User user = userService.getCurrentUser().getData();
         return Result.success(user);
     }
 

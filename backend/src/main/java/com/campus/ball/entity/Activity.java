@@ -67,11 +67,31 @@ public class Activity {
     @Column(name = "create_time")
     @ApiModelProperty(value = "创建时间")
     private LocalDateTime createTime;
-    
+
+    @Column(name = "audit_status", length = 20)
+    @ApiModelProperty(value = "审核状态：pending / published / rejected / offline")
+    private String auditStatus = "pending";
+
+    @Column(name = "reject_reason", length = 1000)
+    @ApiModelProperty(value = "驳回原因")
+    private String rejectReason;
+
+    @Column(name = "offline_reason", length = 1000)
+    @ApiModelProperty(value = "下架原因")
+    private String offlineReason;
+
+    @Column(name = "start_reminder_sent")
+    @ApiModelProperty(value = "开始提醒是否已发送")
+    private Boolean startReminderSent = false;
+
+    @Column(name = "end_reminder_sent")
+    @ApiModelProperty(value = "结束提醒是否已发送")
+    private Boolean endReminderSent = false;
+
     @Transient
     @ApiModelProperty(value = "场地名称，查询时返回")
     private String venueName;
-    
+
     @Transient
     @ApiModelProperty(value = "组织者名称，查询时返回")
     private String organizerName;
@@ -207,5 +227,45 @@ public class Activity {
 
     public void setOrganizerName(String organizerName) {
         this.organizerName = organizerName;
+    }
+
+    public String getAuditStatus() {
+        return auditStatus;
+    }
+
+    public void setAuditStatus(String auditStatus) {
+        this.auditStatus = auditStatus;
+    }
+
+    public String getRejectReason() {
+        return rejectReason;
+    }
+
+    public void setRejectReason(String rejectReason) {
+        this.rejectReason = rejectReason;
+    }
+
+    public String getOfflineReason() {
+        return offlineReason;
+    }
+
+    public void setOfflineReason(String offlineReason) {
+        this.offlineReason = offlineReason;
+    }
+
+    public Boolean getStartReminderSent() {
+        return startReminderSent;
+    }
+
+    public void setStartReminderSent(Boolean startReminderSent) {
+        this.startReminderSent = startReminderSent;
+    }
+
+    public Boolean getEndReminderSent() {
+        return endReminderSent;
+    }
+
+    public void setEndReminderSent(Boolean endReminderSent) {
+        this.endReminderSent = endReminderSent;
     }
 }

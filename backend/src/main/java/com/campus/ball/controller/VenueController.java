@@ -1,6 +1,8 @@
 package com.campus.ball.controller;
 
+import com.campus.ball.auth.AuthContext;
 import com.campus.ball.common.Result;
+import com.campus.ball.entity.User;
 import com.campus.ball.entity.Venue;
 import com.campus.ball.repository.VenueRepository;
 import io.swagger.annotations.Api;
@@ -18,6 +20,11 @@ import java.util.Map;
 public class VenueController {
     @Autowired
     private VenueRepository venueRepository;
+
+    private boolean isAdmin() {
+        User user = AuthContext.getUser();
+        return user != null && "admin".equals(user.getRole());
+    }
     
     @GetMapping("/list")
     @ApiOperation("查询所有场地")
@@ -42,6 +49,9 @@ public class VenueController {
     @PutMapping("/coordinates/{id}")
     @ApiOperation("更新场地坐标")
     public Result<Venue> updateCoordinates(@PathVariable Long id, @RequestBody Map<String, Integer> body) {
+        if (!isAdmin()) {
+            return Result.error(403, "需要管理员权限");
+        }
         return venueRepository.findById(id).map(venue -> {
             if (body.containsKey("mapX")) venue.setMapX(body.get("mapX"));
             if (body.containsKey("mapY")) venue.setMapY(body.get("mapY"));
@@ -53,6 +63,9 @@ public class VenueController {
     @PostMapping("/batch-coordinates")
     @ApiOperation("批量导入或更新场地坐标（按名称匹配）")
     public Result<List<Venue>> batchCoordinates(@RequestBody List<Map<String, Object>> list) {
+        if (!isAdmin()) {
+            return Result.error(403, "需要管理员权限");
+        }
         List<Venue> result = new ArrayList<>();
         for (Map<String, Object> item : list) {
             String name = (String) item.get("name");

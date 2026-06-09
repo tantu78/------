@@ -39,6 +39,14 @@ public class UserService {
         return tokenStore.createToken(user);
     }
 
+    public User findByCredentials(String username, String password) {
+        User user = userRepository.findByUsernameAndPassword(username, password).orElse(null);
+        if (user != null) {
+            user.setPassword(null);
+        }
+        return user;
+    }
+
     public void logout(String token) {
         tokenStore.removeToken(token);
     }

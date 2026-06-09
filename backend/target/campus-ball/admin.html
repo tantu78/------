@@ -239,6 +239,9 @@
             <button class="tab-btn" onclick="switchTab('activities')">
                 <i class="fa fa-calendar"></i> 活动管理
             </button>
+            <button class="tab-btn" onclick="switchTab('audit')">
+                <i class="fa fa-check-circle"></i> 活动审核
+            </button>
             <button class="tab-btn" onclick="switchTab('venues')">
                 <i class="fa fa-map-marker"></i> 场地管理
             </button>
@@ -291,12 +294,48 @@
             </div>
         </div>
 
+        <div class="tab-content" id="tab-audit">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="margin: 0;">活动审核</h3>
+                <select id="audit-status-filter" onchange="loadAuditActivities()" style="padding: 6px 12px; border-radius: 6px; border: 1px solid var(--airbnb-border);">
+                    <option value="">全部状态</option>
+                    <option value="pending">待审核</option>
+                    <option value="published">已发布</option>
+                    <option value="rejected">已驳回</option>
+                    <option value="offline">已下架</option>
+                </select>
+            </div>
+            <div style="overflow-x: auto;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>标题</th>
+                            <th>运动类型</th>
+                            <th>创建者</th>
+                            <th>审核状态</th>
+                            <th>开始时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="audit-table-body">
+                        <tr><td colspan="7" class="empty-state">加载中...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <div class="tab-content" id="tab-venues">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                 <h3 style="margin: 0;">场地列表</h3>
-                <button class="btn-primary" onclick="showAddVenueForm()" style="padding: 8px 16px; font-size: 14px;">
-                    <i class="fa fa-plus"></i> 添加场地
-                </button>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn-secondary" onclick="window.location.href='admin-venues.html'" style="padding: 8px 16px; font-size: 14px;">
+                        <i class="fa fa-map-marker"></i> 地图标点工具
+                    </button>
+                    <button class="btn-primary" onclick="showAddVenueForm()" style="padding: 8px 16px; font-size: 14px;">
+                        <i class="fa fa-plus"></i> 添加场地
+                    </button>
+                </div>
             </div>
             <div id="venue-form-area" style="display:none; margin-bottom: 16px; padding: 20px; background: var(--airbnb-bg); border-radius: 8px;">
                 <h4 id="venue-form-title" style="margin-bottom: 16px;">添加场地</h4>
@@ -315,16 +354,6 @@
                             <option value="football">足球</option>
                             <option value="other">其他</option>
                         </select>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>地图坐标X (%)</label>
-                        <input type="number" class="form-input" id="venue-map-x" min="0" max="100" placeholder="0-100">
-                    </div>
-                    <div class="form-group">
-                        <label>地图坐标Y (%)</label>
-                        <input type="number" class="form-input" id="venue-map-y" min="0" max="100" placeholder="0-100">
                     </div>
                 </div>
                 <div class="form-group">
@@ -363,11 +392,6 @@
     <script src="js/api.js"></script>
     <script src="js/main.js"></script>
     <script>
-        function getCurrentUser() {
-            var userStr = localStorage.getItem('currentUser');
-            return userStr ? JSON.parse(userStr) : null;
-        }
-
         function switchTab(tab) {
             document.querySelectorAll('.tab-btn').forEach(function(btn) {
                 btn.classList.remove('active');
@@ -380,7 +404,85 @@
             
             if (tab === 'users') loadUsers();
             if (tab === 'activities') loadActivities();
+            if (tab === 'audit') loadAuditActivities();
             if (tab === 'venues') loadVenues();
+        }
+
+        function getAuditStatusBadge(status) {
+            if (status === 'pending') {
+                return '<span style="background: #fef3c7; color: #92400e; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 500;">待审核</span>';
+            } else if (status === 'published') {
+                return '<span style="background: #d1fae5; color: #065f46; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 500;">已发布</span>';
+            } else if (status === 'rejected') {
+                return '<span style="background: #fee2e2; color: #991b1b; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 500;">已驳回</span>';
+            } else if (status === 'offline') {
+                return '<span style="background: #f3f4f6; color: #374151; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 500;">已下架</span>';
+            }
+            return status;
+        }
+
+        function loadAuditActivities() {
+            var status = document.getElementById('audit-status-filter').value;
+            var url = '/backend/api/admin/activities';
+            if (status) url += '?auditStatus=' + encodeURIComponent(status);
+            fetch(url, { credentials: 'include' }).then(function(res) {
+                return res.json();
+            }).then(function(res) {
+                if (res.code === 403) {
+                    document.getElementById('audit-table-body').innerHTML = '<tr><td colspan="7" class="empty-state">需要管理员权限</td></tr>';
+                    return;
+                }
+                if (res.code === 200 && res.data) {
+                    var html = '';
+                    var list = res.data.content || res.data;
+                    list.forEach(function(a) {
+                        var badge = getAuditStatusBadge(a.auditStatus);
+                        var actions = '';
+                        if (a.auditStatus === 'pending') {
+                            actions += '<button class="action-btn edit" onclick="window.location.href=\'admin-activity-review.html?id=' + a.id + '\'">审核活动</button>';
+                        } else if (a.auditStatus === 'published') {
+                            actions += '<button class="action-btn edit" onclick="window.location.href=\'admin-activity-review.html?id=' + a.id + '\'">查看</button>';
+                            actions += '<button class="action-btn delete" onclick="offlineActivity(' + a.id + ')">下架</button>';
+                        } else {
+                            actions += '<button class="action-btn edit" onclick="window.location.href=\'admin-activity-review.html?id=' + a.id + '\'">查看</button>';
+                        }
+                        html += '<tr>' +
+                            '<td>' + a.id + '</td>' +
+                            '<td>' + a.title + '</td>' +
+                            '<td>' + (a.sportType || '-') + '</td>' +
+                            '<td>' + (a.organizerName || '-') + '</td>' +
+                            '<td>' + badge + '</td>' +
+                            '<td>' + (a.startTime ? new Date(a.startTime).toLocaleString('zh-CN') : '-') + '</td>' +
+                            '<td>' + actions + '</td>' +
+                            '</tr>';
+                    });
+                    document.getElementById('audit-table-body').innerHTML = html || '<tr><td colspan="7" class="empty-state">暂无活动</td></tr>';
+                }
+            }).catch(function() {
+                document.getElementById('audit-table-body').innerHTML = '<tr><td colspan="7" class="empty-state">加载失败</td></tr>';
+            });
+        }
+
+        function offlineActivity(id) {
+            var reason = prompt('请输入下架原因（至少20个字）：');
+            if (!reason || reason.trim().length < 20) {
+                alert('请输入至少20个字的下架原因');
+                return;
+            }
+            if (!confirm('确定下架该活动？')) return;
+            fetch('/backend/api/admin/activity/' + id + '/offline', {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reason: reason })
+            }).then(function(res) { return res.json(); }).then(function(res) {
+                if (res.code === 200) {
+                    alert('下架成功');
+                    loadAuditActivities();
+                } else {
+                    alert(res.message || '操作失败');
+                }
+            });
         }
 
         function loadStats() {
@@ -468,7 +570,8 @@
                 }
                 if (res.code === 200 && res.data) {
                     var html = '';
-                    res.data.forEach(function(a) {
+                    var list = res.data.content || res.data;
+                    list.forEach(function(a) {
                         html += '<tr>' +
                             '<td>' + a.id + '</td>' +
                             '<td>' + a.title + '</td>' +
@@ -530,8 +633,6 @@
             document.getElementById('venue-edit-id').value = '';
             document.getElementById('venue-name').value = '';
             document.getElementById('venue-sport-type').value = 'basketball';
-            document.getElementById('venue-map-x').value = '';
-            document.getElementById('venue-map-y').value = '';
             document.getElementById('venue-capacity').value = '';
             document.getElementById('venue-description').value = '';
         }
@@ -547,8 +648,6 @@
                     document.getElementById('venue-edit-id').value = venue.id;
                     document.getElementById('venue-name').value = venue.name || '';
                     document.getElementById('venue-sport-type').value = venue.sportType || 'basketball';
-                    document.getElementById('venue-map-x').value = venue.mapX || '';
-                    document.getElementById('venue-map-y').value = venue.mapY || '';
                     document.getElementById('venue-capacity').value = venue.capacity || '';
                     document.getElementById('venue-description').value = venue.description || '';
                 }
@@ -570,8 +669,6 @@
             var venueData = {
                 name: name,
                 sportType: document.getElementById('venue-sport-type').value,
-                mapX: parseInt(document.getElementById('venue-map-x').value) || null,
-                mapY: parseInt(document.getElementById('venue-map-y').value) || null,
                 capacity: parseInt(document.getElementById('venue-capacity').value) || null,
                 description: document.getElementById('venue-description').value.trim() || null
             };
@@ -613,14 +710,26 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            var user = getCurrentUser();
-            if (!user) {
-                window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.href);
-                return;
-            }
-            
-            loadStats();
-            loadUsers();
+            checkAuth().then(function(user) {
+                if (!user) {
+                    window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.href);
+                    return;
+                }
+
+                if (user.role !== 'admin') {
+                    document.querySelector('.admin-container').innerHTML =
+                        '<div class="empty-state" style="padding:100px 20px">' +
+                        '<i class="fa fa-lock" style="font-size:64px;color:var(--airbnb-gray);margin-bottom:16px"></i>' +
+                        '<h3>需要管理员权限</h3>' +
+                        '<p style="color:var(--airbnb-gray);margin-bottom:16px">您的账号没有管理员权限</p>' +
+                        '<a href="index.html" class="btn-primary" style="text-decoration:none">返回首页</a>' +
+                        '</div>';
+                    return;
+                }
+
+                loadStats();
+                loadUsers();
+            });
         });
     </script>
 </body>

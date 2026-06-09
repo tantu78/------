@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>活动审核 - 校园约球</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+    <style>
+        :root {
+            --airbnb-red: #FF385C;
+            --airbnb-dark: #222222;
+            --airbnb-gray: #717171;
+            --airbnb-border: #DDDDDD;
+            --airbnb-bg: #F7F7F7;
+            --airbnb-teal: #00A699;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--airbnb-bg);
+            color: var(--airbnb-dark);
+        }
+
+        nav {
+            background: white;
+            border-bottom: 1px solid var(--airbnb-border);
+            padding: 12px 0;
+        }
+
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--airbnb-red);
+            text-decoration: none;
+        }
+
+        .logo i {
+            font-size: 28px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--airbnb-gray);
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: var(--airbnb-bg);
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--airbnb-border);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .info-label {
+            color: var(--airbnb-gray);
+            font-size: 13px;
+        }
+
+        .info-value {
+            font-size: 14px;
+        }
+
+        .description {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--airbnb-border);
+            line-height: 1.6;
+            font-size: 14px;
+            color: var(--airbnb-gray);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-published { background: #d1fae5; color: #065f46; }
+        .status-rejected { background: #fee2e2; color: #991b1b; }
+        .status-offline { background: #f3f4f6; color: #374151; }
+
+        .log-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .log-item {
+            padding: 12px;
+            background: var(--airbnb-bg);
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .log-main {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .log-title {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .log-remark {
+            font-size: 13px;
+            color: var(--airbnb-gray);
+        }
+
+        .log-meta {
+            font-size: 12px;
+            color: var(--airbnb-gray);
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .action-area {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .btn-primary {
+            background: var(--airbnb-red);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--airbnb-dark);
+            border: 1px solid var(--airbnb-border);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background: var(--airbnb-bg);
+        }
+
+        .btn-danger {
+            background: var(--airbnb-red);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 12px 14px;
+            border: 1px solid var(--airbnb-border);
+            border-radius: 8px;
+            font-size: 14px;
+            resize: vertical;
+        }
+
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--airbnb-red);
+        }
+
+        .reason-hint {
+            color: var(--airbnb-gray);
+            font-size: 13px;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-content">
+            <a href="admin.html" class="logo">
+                <i class="fa fa-basketball-ball"></i>
+                <span>校园约球</span>
+            </a>
+            <a href="admin.html" class="back-btn">
+                <i class="fa fa-arrow-left"></i>
+                返回管理后台
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1 class="page-title" id="activity-title">加载中...</h1>
+            <div id="activity-status"></div>
+        </div>
+
+        <div class="card">
+            <h3 class="card-title">活动详情</h3>
+            <div class="info-grid" id="activity-info"></div>
+            <div class="description" id="activity-description"></div>
+        </div>
+
+        <div class="card">
+            <h3 class="card-title">审核日志</h3>
+            <div class="log-list" id="audit-logs"></div>
+        </div>
+
+        <div class="card" id="action-area">
+            <h3 class="card-title">审核操作</h3>
+            <div class="action-area"></div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        var activityId = null;
+        var currentActivity = null;
+
+        function getStatusClass(status) {
+            switch(status) {
+                case 'pending': return 'status-pending';
+                case 'published': return 'status-published';
+                case 'rejected': return 'status-rejected';
+                case 'offline': return 'status-offline';
+                default: return '';
+            }
+        }
+
+        function getStatusText(status) {
+            switch(status) {
+                case 'pending': return '待审核';
+                case 'published': return '已发布';
+                case 'rejected': return '已驳回';
+                case 'offline': return '已下架';
+                default: return status;
+            }
+        }
+
+        function getSportText(sport) {
+            var map = { basketball: '篮球', badminton: '羽毛球', pingpong: '乒乓球', football: '足球' };
+            return map[sport] || sport;
+        }
+
+        function renderActivity(activity) {
+            document.getElementById('activity-title').textContent = activity.title;
+            document.getElementById('activity-status').innerHTML =
+                '<span class="status-badge ' + getStatusClass(activity.auditStatus) + '">' + getStatusText(activity.auditStatus) + '</span>';
+
+            var html = '';
+            html += '<div class="info-item"><span class="info-label">运动类型</span><span class="info-value">' + getSportText(activity.sportType) + '</span></div>';
+            html += '<div class="info-item"><span class="info-label">创建者</span><span class="info-value">' + (activity.organizerName || '-') + '</span></div>';
+            html += '<div class="info-item"><span class="info-label">场地</span><span class="info-value">' + (activity.venueName || '-') + '</span></div>';
+            html += '<div class="info-item"><span class="info-label">开始时间</span><span class="info-value">' + (activity.startTime ? new Date(activity.startTime).toLocaleString('zh-CN') : '-') + '</span></div>';
+            html += '<div class="info-item"><span class="info-label">结束时间</span><span class="info-value">' + (activity.endTime ? new Date(activity.endTime).toLocaleString('zh-CN') : '-') + '</span></div>';
+            html += '<div class="info-item"><span class="info-label">参与人数</span><span class="info-value">' + (activity.currentParticipants || 0) + ' / ' + (activity.maxParticipants || 0) + '</span></div>';
+            document.getElementById('activity-info').innerHTML = html;
+
+            var descHtml = '';
+            if (activity.auditStatus === 'rejected' && activity.rejectReason) {
+                descHtml += '<div style="margin-bottom: 12px; padding: 12px; background: #fee2e2; color: #991b1b; border-radius: 8px;"><strong>驳回原因：</strong>' + activity.rejectReason + '</div>';
+            }
+            if (activity.auditStatus === 'offline' && activity.offlineReason) {
+                descHtml += '<div style="margin-bottom: 12px; padding: 12px; background: #f3f4f6; color: #374151; border-radius: 8px;"><strong>下架原因：</strong>' + activity.offlineReason + '</div>';
+            }
+            if (activity.description) {
+                descHtml += '<strong>活动描述：</strong><div>' + activity.description + '</div>';
+            }
+            document.getElementById('activity-description').innerHTML = descHtml;
+
+            renderActions(activity);
+        }
+
+        function renderActions(activity) {
+            var html = '';
+            if (activity.auditStatus === 'pending') {
+                html += '<button class="btn-primary" onclick="approveActivity()">' +
+                    '<i class="fa fa-check"></i> 审核通过</button>';
+                html += '<button class="btn-danger" onclick="showRejectModal()">' +
+                    '<i class="fa fa-times"></i> 驳回</button>';
+            } else if (activity.auditStatus === 'published') {
+                html += '<button class="btn-danger" onclick="showOfflineModal()">' +
+                    '<i class="fa fa-ban"></i> 下架活动</button>';
+            }
+            document.querySelector('#action-area .action-area').innerHTML = html;
+        }
+
+        function renderLogs(logs) {
+            if (!logs || logs.length === 0) {
+                document.getElementById('audit-logs').innerHTML = '<div class="empty-state" style="text-align:center;padding:32px;color:var(--airbnb-gray);">暂无审核记录</div>';
+                return;
+            }
+            var html = '';
+            logs.forEach(function(log) {
+                var actionText = '';
+                switch(log.action) {
+                    case 'approve': actionText = '审核通过'; break;
+                    case 'reject': actionText = '驳回'; break;
+                    case 'offline': actionText = '下架'; break;
+                    default: actionText = log.action;
+                }
+                html += '<div class="log-item">' +
+                    '<div class="log-main">' +
+                    '<div class="log-title">' + actionText + '</div>' +
+                    (log.remark ? '<div class="log-remark">' + log.remark + '</div>' : '') +
+                    '</div>' +
+                    '<div class="log-meta">' +
+                    (log.adminName ? log.adminName : '管理员') + '<br>' +
+                    (log.createTime ? new Date(log.createTime).toLocaleString('zh-CN') : '') +
+                    '</div>' +
+                    '</div>';
+            });
+            document.getElementById('audit-logs').innerHTML = html;
+        }
+
+        function approveActivity() {
+            if (!confirm('确定审核通过该活动？')) return;
+            fetch('/backend/api/admin/activity/' + activityId + '/approve', {
+                method: 'POST',
+                credentials: 'include'
+            }).then(function(res) { return res.json(); }).then(function(res) {
+                if (res.code === 200) {
+                    alert('审核成功');
+                    loadActivity();
+                    loadLogs();
+                } else {
+                    alert(res.message || '操作失败');
+                }
+            });
+        }
+
+        function showRejectModal() {
+            var reason = prompt('请输入驳回原因（至少20个字）：');
+            if (!reason || reason.trim().length < 20) {
+                alert('驳回原因至少需要20个字');
+                return;
+            }
+            if (!confirm('确定驳回该活动？')) return;
+            fetch('/backend/api/admin/activity/' + activityId + '/reject', {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reason: reason })
+            }).then(function(res) { return res.json(); }).then(function(res) {
+                if (res.code === 200) {
+                    alert('驳回成功');
+                    loadActivity();
+                    loadLogs();
+                } else {
+                    alert(res.message || '操作失败');
+                }
+            });
+        }
+
+        function showOfflineModal() {
+            var reason = prompt('请输入下架原因（至少20个字）：');
+            if (!reason || reason.trim().length < 20) {
+                alert('下架原因至少需要20个字');
+                return;
+            }
+            if (!confirm('确定下架该活动？')) return;
+            fetch('/backend/api/admin/activity/' + activityId + '/offline', {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reason: reason })
+            }).then(function(res) { return res.json(); }).then(function(res) {
+                if (res.code === 200) {
+                    alert('下架成功');
+                    loadActivity();
+                    loadLogs();
+                } else {
+                    alert(res.message || '操作失败');
+                }
+            });
+        }
+
+        function loadActivity() {
+            fetch('/backend/api/admin/activity/' + activityId, { credentials: 'include' }).then(function(res) {
+                return res.json();
+            }).then(function(res) {
+                if (res.code === 403) {
+                    alert('需要管理员权限');
+                    window.location.href = 'index.html';
+                    return;
+                }
+                if (res.code === 200 && res.data) {
+                    currentActivity = res.data;
+                    renderActivity(res.data);
+                }
+            }).catch(function() {
+                alert('加载失败');
+            });
+        }
+
+        function loadLogs() {
+            fetch('/backend/api/admin/activity/' + activityId + '/logs', { credentials: 'include' }).then(function(res) {
+                return res.json();
+            }).then(function(res) {
+                if (res.code === 200 && res.data) {
+                    renderLogs(res.data);
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth().then(function(user) {
+                if (!user) {
+                    window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.href);
+                    return;
+                }
+                if (user.role !== 'admin') {
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                var params = new URLSearchParams(window.location.search);
+                activityId = params.get('id');
+                if (!activityId) {
+                    alert('缺少活动ID');
+                    window.location.href = 'admin.html';
+                    return;
+                }
+
+                loadActivity();
+                loadLogs();
+            });
+        });
+    </script>
+</body>
+</html>

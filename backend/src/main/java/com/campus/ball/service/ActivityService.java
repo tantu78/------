@@ -4,8 +4,10 @@ import com.campus.ball.auth.AuthContext;
 import com.campus.ball.common.Result;
 import com.campus.ball.common.ResultCode;
 import com.campus.ball.entity.Activity;
+import com.campus.ball.entity.ActivityAuditLog;
 import com.campus.ball.entity.ActivityParticipant;
 import com.campus.ball.entity.User;
+import com.campus.ball.repository.ActivityAuditLogRepository;
 import com.campus.ball.repository.ActivityParticipantRepository;
 import com.campus.ball.repository.ActivityRepository;
 import com.campus.ball.repository.VenueRepository;
@@ -122,9 +124,9 @@ public class ActivityService {
         Page<Activity> activities;
         LocalDateTime now = LocalDateTime.now();
         if (sportType != null && !sportType.isEmpty()) {
-            activities = activityRepository.findBySportTypeAndStartTimeAfter(sportType, now, pageable);
+            activities = activityRepository.findBySportTypeAndAuditStatusAndStartTimeAfter(sportType, "published", now, pageable);
         } else {
-            activities = activityRepository.findByStartTimeAfter(now, pageable);
+            activities = activityRepository.findByAuditStatusAndStartTimeAfter("published", now, pageable);
         }
         activities.getContent().forEach(this::fillActivityInfo);
         return Result.success(activities);
@@ -155,7 +157,7 @@ public class ActivityService {
 
     public Result<List<Activity>> listActivitiesByVenue(Long venueId) {
         List<Activity> activities = activityRepository
-                .findByVenueIdAndStartTimeAfter(venueId, LocalDateTime.now(), Pageable.unpaged()).getContent();
+                .findByVenueIdAndAuditStatusAndStartTimeAfter(venueId, "published", LocalDateTime.now());
         activities.forEach(this::fillActivityInfo);
         return Result.success(activities);
     }
@@ -172,7 +174,7 @@ public class ActivityService {
         }
         List<String> sportTypes = Arrays.asList(favoriteSport.trim().split("\\s*,\\s*"));
         List<Activity> activities = activityRepository
-                .findBySportTypeInAndStartTimeAfter(sportTypes, LocalDateTime.now());
+                .findBySportTypeInAndAuditStatusAndStartTimeAfter(sportTypes, "published", LocalDateTime.now());
         activities.forEach(this::fillActivityInfo);
         return Result.success(activities);
     }
@@ -201,4 +203,116 @@ public class ActivityService {
             }
         }
     }
+
+    public Result<Activity> approveActivity(Long activityId) {
+        User admin = AuthContext.getUser();
+        if (admin == null || !"admin".equals(admin.getRole())) {
+            return Result.error(403, "无权操作");
+        }
+
+        Activity activity = activityRepository.findById(activityId).orElse(null);
+        if (activity == null) {
+            return Result.error("活动不存在");
+        }
+
+        if (!"pending".equals(activity.getAuditStatus())) {
+            return Result.error("只能审核待审核活动");
+        }
+
+        activity.setAuditStatus("published");
+        activity.setRejectReason(null);
+        activityRepository.save(activity);
+
+        ActivityAuditLog log = new ActivityAuditLog();
+        log.setActivityId(activityId);
+        log.setAdminId(admin.getId());
+        log.setAdminName(admin.getUsername());
+        log.setAction("approve");
+        log.setRemark("审核通过");
+        auditLogRepository.save(log);
+
+        notificationService.createActivityAuditResult(activityId, activity.getTitle(), "published", null);
+
+        return Result.success(activity);
+    }
+
+    public Result<Activity> rejectActivity(Long activityId, String reason) {
+        User admin = AuthContext.getUser();
+        if (admin == null || !"admin".equals(admin.getRole())) {
+            return Result.error(403, "无权操作");
+        }
+
+        if (reason == null || reason.trim().length() < 20) {
+            return Result.error("驳回原因不能少于20个字");
+        }
+
+        Activity activity = activityRepository.findById(activityId).orElse(null);
+        if (activity == null) {
+            return Result.error("活动不存在");
+        }
+
+        if (!"pending".equals(activity.getAuditStatus())) {
+            return Result.error("只能审核待审核活动");
+        }
+
+        activity.setAuditStatus("rejected");
+        activity.setRejectReason(reason);
+        activityRepository.save(activity);
+
+        ActivityAuditLog log = new ActivityAuditLog();
+        log.setActivityId(activityId);
+        log.setAdminId(admin.getId());
+        log.setAdminName(admin.getUsername());
+        log.setAction("reject");
+        log.setRemark(reason);
+        auditLogRepository.save(log);
+
+        notificationService.createActivityAuditResult(activityId, activity.getTitle(), "rejected", reason);
+
+        return Result.success(activity);
+    }
+
+    public Result<Activity> offlineActivity(Long activityId, String reason) {
+        User admin = AuthContext.getUser();
+        if (admin == null || !"admin".equals(admin.getRole())) {
+            return Result.error(403, "无权操作");
+        }
+
+        if (reason == null || reason.trim().length() < 20) {
+            return Result.error("下架原因不能少于20个字");
+        }
+
+        Activity activity = activityRepository.findById(activityId).orElse(null);
+        if (activity == null) {
+            return Result.error("活动不存在");
+        }
+
+        if (!"published".equals(activity.getAuditStatus())) {
+            return Result.error("只能下架已发布活动");
+        }
+
+        activity.setAuditStatus("offline");
+        activity.setOfflineReason(reason);
+        activityRepository.save(activity);
+
+        ActivityAuditLog log = new ActivityAuditLog();
+        log.setActivityId(activityId);
+        log.setAdminId(admin.getId());
+        log.setAdminName(admin.getUsername());
+        log.setAction("offline");
+        log.setRemark(reason);
+        auditLogRepository.save(log);
+
+        notificationService.createActivityAuditResult(activityId, activity.getTitle(), "offline", reason);
+
+        return Result.success(activity);
+    }
+
+    public Result<List<ActivityAuditLog>> getAuditLogs(Long activityId) {
+        List<ActivityAuditLog> logs = auditLogRepository.findByActivityIdOrderByCreateTimeDesc(activityId);
+        return Result.success(logs);
+    }
+
+    @Autowired
+    private ActivityAuditLogRepository auditLogRepository;
 }

@@ -208,9 +208,11 @@
     <script src="js/api.js"></script>
     <script src="js/main.js"></script>
     <script>
-        function getRedirectUrl() {
-            var params = new URLSearchParams(window.location.search);
-            return params.get('redirect') || 'index.html';
+        function getLoginTarget(user) {
+            if (user && user.role === 'admin') {
+                return 'admin.html';
+            }
+            return 'index.html';
         }
 
         function login() {
@@ -233,7 +235,7 @@
                     setCurrentUser(res.data);
                     showToast('登录成功！', 'success');
                     setTimeout(function() {
-                        window.location.href = getRedirectUrl();
+                        window.location.href = getLoginTarget(res.data);
                     }, 500);
                 } else {
                     showToast(res.message || '登录失败', 'error');

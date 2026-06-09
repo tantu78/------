@@ -328,22 +328,6 @@
                     </div>
                 </div>
 
-                <!-- 封面图片 -->
-                <div class="form-section">
-                    <h3 class="section-title">
-                        <i class="fa fa-image"></i>
-                        活动封面
-                    </h3>
-
-                    <div class="upload-area" id="upload-area" onclick="document.getElementById('cover-upload').click()">
-                        <i class="fa fa-cloud-upload" id="upload-icon"></i>
-                        <p id="upload-text">点击上传活动封面图片</p>
-                        <small id="upload-hint">支持 JPG、PNG 格式，建议尺寸 1200x800</small>
-                        <img id="cover-preview" src="" alt="预览" style="display:none; max-width:100%; max-height:220px; border-radius:8px; margin-top:12px;">
-                        <input type="file" id="cover-upload" accept="image/*" style="display: none;" onchange="handleCoverUpload(event)">
-                    </div>
-                </div>
-
                 <!-- 更多设置 -->
                 <div class="form-section">
                     <h3 class="section-title">
@@ -398,32 +382,6 @@
     <script src="js/main.js"></script>
     <script>
         var allVenues = [];
-        var uploadedCoverUrl = '';
-
-        function handleCoverUpload(event) {
-            var file = event.target.files[0];
-            if (!file) return;
-            
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('cover-preview').src = e.target.result;
-                document.getElementById('cover-preview').style.display = 'block';
-                document.getElementById('upload-icon').style.display = 'none';
-                document.getElementById('upload-text').textContent = file.name;
-                document.getElementById('upload-hint').style.display = 'none';
-            };
-            reader.readAsDataURL(file);
-            
-            API.upload.image(file).then(function(res) {
-                if (res.code === 200 && res.data) {
-                    uploadedCoverUrl = res.data.url;
-                } else {
-                    showToast(res.message || '图片上传失败', 'error');
-                }
-            }).catch(function() {
-                showToast('图片上传失败', 'error');
-            });
-        }
 
         function loadVenueOptions() {
             API.venue.list().then(function(res) {
@@ -535,8 +493,7 @@
                 startTime: startTime + ':00',
                 endTime: endTime + ':00',
                 venueId: parseInt(venueId),
-                isPublic: isPublic,
-                coverImage: uploadedCoverUrl || null
+                isPublic: isPublic
             };
 
             var btn = document.querySelector('.btn-primary');

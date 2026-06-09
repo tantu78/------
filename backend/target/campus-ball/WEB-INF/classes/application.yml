@@ -32,5 +32,5 @@ project:
 
 file:
   upload:
-    path: ./uploads
+    path: E:/设计/WEB大作业/backend/uploads
     max-size: 10MB
