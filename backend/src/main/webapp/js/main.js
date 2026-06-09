@@ -49,21 +49,20 @@ function updateNavForAuth(loggedIn) {
     var loginBtn = navRight.querySelector('a.nav-login');
     var registerBtn = navRight.querySelector('a.nav-register');
     var userAvatar = navRight.querySelector('.user-avatar');
-    var notificationIcon = navRight.querySelector('.notification-icon');
+    var mapBtn = navRight.querySelector('a[href="map.html"]');
 
     if (loggedIn) {
         if (loginBtn) loginBtn.style.display = 'none';
         if (registerBtn) registerBtn.style.display = 'none';
         if (createBtn) createBtn.style.display = '';
         if (userAvatar) userAvatar.style.display = '';
-        if (notificationIcon) notificationIcon.style.display = '';
-        loadUnreadCount();
+        if (mapBtn) mapBtn.style.display = '';
     } else {
         if (loginBtn) loginBtn.style.display = '';
         if (registerBtn) registerBtn.style.display = '';
         if (createBtn) createBtn.style.display = 'none';
         if (userAvatar) userAvatar.style.display = 'none';
-        if (notificationIcon) notificationIcon.style.display = 'none';
+        if (mapBtn) mapBtn.style.display = 'none';
     }
 }
 
@@ -196,16 +195,3 @@ function showToast(msg, type) {
 document.addEventListener('DOMContentLoaded', function() {
     checkAuth();
 });
-
-function loadUnreadCount() {
-    var badge = document.querySelector('.notification-badge');
-    if (!badge) return;
-    
-    API.notification.unreadCount().then(function(res) {
-        if (res.code === 200 && res.data) {
-            var count = res.data.count || 0;
-            badge.textContent = count;
-            badge.style.display = count > 0 ? '' : 'none';
-        }
-    }).catch(function() {});
-}

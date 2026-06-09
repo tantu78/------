@@ -61,112 +61,120 @@
         .forum-list {
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 10px;
         }
 
         .forum-card {
             display: flex;
             background: white;
             border: 1px solid var(--airbnb-border);
-            border-radius: 12px;
+            border-radius: 10px;
             overflow: hidden;
             cursor: pointer;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
         .forum-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 24px rgba(0,0,0,0.08);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
         }
 
         .forum-card-color {
-            width: 6px;
+            width: 5px;
             flex-shrink: 0;
         }
 
         .forum-card-content {
             flex: 1;
-            padding: 20px 24px;
+            padding: 10px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 0;
         }
 
-        .forum-card-header {
+        .forum-card-row {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-            margin-bottom: 12px;
+            gap: 12px;
+            min-width: 0;
         }
 
         .forum-card-title {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
+            min-width: 0;
+            flex: 1;
         }
 
         .forum-card-title i {
-            font-size: 20px;
+            font-size: 16px;
+            flex-shrink: 0;
         }
 
         .forum-card-title h3 {
-            font-size: 18px;
-            font-weight: 700;
+            font-size: 15px;
+            font-weight: 600;
             margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .forum-card-tags {
             display: flex;
-            align-items: center;
-            gap: 8px;
+            gap: 6px;
             flex-shrink: 0;
         }
 
         .forum-tag {
-            font-size: 12px;
-            padding: 4px 10px;
-            border-radius: 100px;
-            background: var(--airbnb-bg);
-            color: var(--airbnb-gray);
-            white-space: nowrap;
+            padding: 1px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 500;
         }
 
         .forum-tag.hot {
-            background: rgba(255, 56, 92, 0.1);
-            color: var(--airbnb-red);
+            background: #FFF3E0;
+            color: #FF9800;
         }
 
         .forum-tag.full {
-            background: rgba(0,0,0,0.06);
-            color: #666;
+            background: #FFEBEE;
+            color: #F44336;
         }
 
         .forum-card-meta {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 12px 24px;
-            margin-bottom: 10px;
-            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 13px;
             color: var(--airbnb-gray);
+            flex-shrink: 0;
         }
 
         .forum-meta-item {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 4px;
+            white-space: nowrap;
         }
 
         .forum-meta-item i {
-            width: 16px;
-            text-align: center;
+            font-size: 12px;
         }
 
         .forum-card-desc {
-            font-size: 14px;
-            color: var(--airbnb-dark);
-            line-height: 1.6;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
+            font-size: 13px;
+            color: var(--airbnb-gray);
+            line-height: 1.5;
             overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            min-width: 0;
         }
 
         .forum-pagination {
@@ -224,26 +232,29 @@
     <!-- 导航栏 -->
     <nav>
         <div class="container nav-content">
-            <a href="index.html" class="logo">
-                <i class="fa fa-basketball-ball"></i>
-                <span>校园约球</span>
-            </a>
-
-            <div class="search-bar">
-                <i class="fa fa-search" style="color: var(--airbnb-gray);"></i>
-                <input type="text" placeholder="搜索运动类型、场地、活动...">
+            <div class="nav-left">
+                <a href="index.html" class="logo">
+                    <i class="fa fa-basketball-ball"></i>
+                    <span>校园约球</span>
+                </a>
+                <div class="nav-sport-tabs">
+                    <a href="index.html" class="nav-sport-item active">全部</a>
+                    <a href="?type=basketball" class="nav-sport-item">篮球</a>
+                    <a href="?type=badminton" class="nav-sport-item">羽毛球</a>
+                    <a href="?type=pingpong" class="nav-sport-item">乒乓球</a>
+                    <a href="?type=football" class="nav-sport-item">足球</a>
+                </div>
             </div>
 
             <div class="nav-right">
-                <a href="login.html" class="btn-secondary nav-login" style="padding: 8px 16px; font-size: 14px;">登录</a>
-                <a href="register.html" class="btn-primary nav-register" style="padding: 8px 16px; font-size: 14px;">注册</a>
-                <a href="create-activity.html" class="btn-primary" style="padding: 8px 16px; font-size: 14px; display: none;">
-                    <i class="fa fa-plus mr-1"></i> 发起活动
+                <a href="map.html" class="btn-secondary" style="padding: 6px 14px; font-size: 13px;">
+                    <i class="fa fa-map-marker" style="margin-right:4px;"></i>按位置筛选
                 </a>
-                <div class="notification-icon" style="display: none;">
-                    <i class="fa fa-bell"></i>
-                    <span class="notification-badge">0</span>
-                </div>
+                <a href="login.html" class="btn-secondary nav-login" style="padding: 6px 14px; font-size: 13px;">登录</a>
+                <a href="create-activity.html" class="btn-primary" style="padding: 6px 14px; font-size: 13px; display: none;">
+                    <i class="fa fa-plus" style="margin-right:4px;"></i>发起活动
+                </a>
+                <a href="register.html" class="btn-primary nav-register" style="padding: 6px 14px; font-size: 13px;">注册</a>
                 <a href="profile.html" class="user-avatar" style="display: none;">
                     <i class="fa fa-user" style="color: var(--airbnb-gray);"></i>
                 </a>
@@ -251,54 +262,22 @@
         </div>
     </nav>
 
-    <!-- 筛选栏 -->
-    <div class="filter-bar">
-        <div class="container filter-content">
-            <a href="index.html" class="filter-item active">
-                <i class="fa fa-basketball-ball"></i>
-                <span>全部</span>
-            </a>
-            <a href="?type=basketball" class="filter-item">
-                <i class="fa fa-basketball-ball"></i>
-                <span>篮球</span>
-            </a>
-            <a href="?type=badminton" class="filter-item">
-                <i class="fa fa-table-tennis"></i>
-                <span>羽毛球</span>
-            </a>
-            <a href="?type=pingpong" class="filter-item">
-                <i class="fa fa-table-tennis-paddle-ball"></i>
-                <span>乒乓球</span>
-            </a>
-            <a href="?type=football" class="filter-item">
-                <i class="fa fa-futbol"></i>
-                <span>足球</span>
-            </a>
-            <div class="filter-right">
-                <a href="map.html" class="btn-secondary" style="padding: 8px 16px; font-size: 14px;">
-                    <i class="fa fa-map-marker mr-2"></i>
-                    按位置筛选
-                </a>
-            </div>
-        </div>
-    </div>
-
     <!-- 主内容区 -->
     <main class="container">
         <!-- Hero区域 -->
         <div class="hero">
             <img src="img/跑道.jpg" alt="跑道背景" class="hero-bg">
             <div class="hero-content">
-                <h1>找到身边的球友，随时约球</h1>
-                <p>覆盖全校所有运动场地，支持篮球、羽毛球、乒乓球等多种运动</p>
-                <button class="btn-primary">
-                    立即找活动
-                </button>
-            </div>
-            <div class="hero-characters">
-                <img src="img/篮球.jpg" alt="篮球" class="hero-character">
-                <img src="img/羽毛球.jpg" alt="羽毛球" class="hero-character">
-                <img src="img/足球.jpg" alt="足球" class="hero-character">
+                <div class="hero-text">
+                    <h1>找到身边的球友，随时约球</h1>
+                    <p>覆盖全校所有运动场地，支持篮球、羽毛球、乒乓球等多种运动</p>
+                    <button class="hero-btn">立即找活动</button>
+                </div>
+                <div class="hero-characters">
+                    <img src="img/篮球.jpg" alt="篮球" class="hero-character">
+                    <img src="img/羽毛球.jpg" alt="羽毛球" class="hero-character">
+                    <img src="img/足球.jpg" alt="足球" class="hero-character">
+                </div>
             </div>
         </div>
 
@@ -341,7 +320,7 @@
             var type = params.get('type');
             if (type) {
                 currentSportType = type;
-                var items = document.querySelectorAll('.filter-item');
+                var items = document.querySelectorAll('.nav-sport-item');
                 items.forEach(function(item) {
                     var href = item.getAttribute('href');
                     item.classList.toggle('active', href && href.indexOf('type=' + type) !== -1);
@@ -428,36 +407,28 @@
             if (isHot) tags.push('<span class="forum-tag hot">🔥 热门</span>');
             if (isFull) tags.push('<span class="forum-tag full">满员</span>');
 
+            var desc = activity.description || '';
+            if (desc.length > 60) desc = desc.substring(0, 60) + '...';
+
             return '<div class="forum-card" onclick="window.location.href=\'activity-detail.html?id=' + activity.id + '\'">' +
                 '<div class="forum-card-color" style="background: ' + cfg.color + '"></div>' +
                 '<div class="forum-card-content">' +
-                    '<div class="forum-card-header">' +
+                    '<div class="forum-card-row">' +
                         '<div class="forum-card-title">' +
                             '<i class="fa ' + cfg.icon + '" style="color:' + cfg.color + '"></i>' +
                             '<h3>' + (activity.title || '未命名活动') + '</h3>' +
                         '</div>' +
                         '<div class="forum-card-tags">' + tags.join('') + '</div>' +
                     '</div>' +
-                    '<div class="forum-card-meta">' +
-                        '<div class="forum-meta-item">' +
-                            '<i class="fa fa-user"></i>' +
-                            '<span>' + (activity.organizerName || '未知组织者') + '</span>' +
-                        '</div>' +
-                        '<div class="forum-meta-item">' +
-                            '<i class="fa fa-map-marker"></i>' +
-                            '<span>' + (activity.venueName || '未知场地') + '</span>' +
-                        '</div>' +
-                        '<div class="forum-meta-item">' +
-                            '<i class="fa fa-clock-o"></i>' +
-                            '<span>' + formatDateRange(activity.startTime, activity.endTime) + '</span>' +
-                        '</div>' +
-                        '<div class="forum-meta-item">' +
-                            '<i class="fa fa-users"></i>' +
-                            '<span>' + current + ' / ' + max + ' 人</span>' +
-                            (activity.evaluationCount ? '<span><i class="fa fa-comment"></i> ' + activity.evaluationCount + ' 条评价</span>' : '') +
+                    '<div class="forum-card-row">' +
+                        '<div class="forum-card-meta">' +
+                            '<span class="forum-meta-item"><i class="fa fa-user"></i>' + (activity.organizerName || '未知组织者') + '</span>' +
+                            '<span class="forum-meta-item"><i class="fa fa-map-marker"></i>' + (activity.venueName || '未知场地') + '</span>' +
+                            '<span class="forum-meta-item"><i class="fa fa-clock-o"></i>' + formatDateRange(activity.startTime, activity.endTime) + '</span>' +
+                            '<span class="forum-meta-item"><i class="fa fa-users"></i>' + current + '/' + max + '人</span>' +
                         '</div>' +
                     '</div>' +
-                    (activity.description ? '<div class="forum-card-desc">' + activity.description + '</div>' : '') +
+                    (desc ? '<div class="forum-card-desc">' + desc + '</div>' : '') +
                 '</div>' +
             '</div>';
         }

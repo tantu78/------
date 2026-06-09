@@ -155,26 +155,29 @@
     <!-- 导航栏 -->
     <nav>
         <div class="container nav-content">
-            <a href="index.html" class="logo">
-                <i class="fa fa-basketball-ball"></i>
-                <span>校园约球</span>
-            </a>
-            
-            <div class="search-bar">
-                <i class="fa fa-search" style="color: var(--airbnb-gray);"></i>
-                <input type="text" placeholder="搜索运动类型、场地、活动...">
-            </div>
-            
-            <div class="nav-right">
-                <a href="login.html" class="btn-secondary nav-login" style="padding: 8px 16px; font-size: 14px;">登录</a>
-                <a href="register.html" class="btn-primary nav-register" style="padding: 8px 16px; font-size: 14px;">注册</a>
-                <a href="create-activity.html" class="btn-primary" style="padding: 8px 16px; font-size: 14px; display: none;">
-                    <i class="fa fa-plus mr-1"></i> 发起活动
+            <div class="nav-left">
+                <a href="index.html" class="logo">
+                    <i class="fa fa-basketball-ball"></i>
+                    <span>校园约球</span>
                 </a>
-                <div class="notification-icon" style="display: none;">
-                    <i class="fa fa-bell"></i>
-                    <span class="notification-badge">0</span>
+                <div class="nav-sport-tabs">
+                    <a href="index.html" class="nav-sport-item">全部</a>
+                    <a href="index.html?type=basketball" class="nav-sport-item">篮球</a>
+                    <a href="index.html?type=badminton" class="nav-sport-item">羽毛球</a>
+                    <a href="index.html?type=pingpong" class="nav-sport-item">乒乓球</a>
+                    <a href="index.html?type=football" class="nav-sport-item">足球</a>
                 </div>
+            </div>
+
+            <div class="nav-right">
+                <a href="map.html" class="btn-secondary" style="padding: 6px 14px; font-size: 13px;">
+                    <i class="fa fa-map-marker" style="margin-right:4px;"></i>按位置筛选
+                </a>
+                <a href="login.html" class="btn-secondary nav-login" style="padding: 6px 14px; font-size: 13px;">登录</a>
+                <a href="create-activity.html" class="btn-primary" style="padding: 6px 14px; font-size: 13px; display: none;">
+                    <i class="fa fa-plus" style="margin-right:4px;"></i>发起活动
+                </a>
+                <a href="register.html" class="btn-primary nav-register" style="padding: 6px 14px; font-size: 13px;">注册</a>
                 <a href="profile.html" class="user-avatar" style="display: none;">
                     <i class="fa fa-user" style="color: var(--airbnb-gray);"></i>
                 </a>
