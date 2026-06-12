@@ -37,14 +37,6 @@
 - MySQL 8.x (云端数据库)
 - Maven (项目管理)
 
-### 数据库配置
-- 地址：8.137.86.44
-- 端口：3306 (默认)
-- 数据库名：yueqiu
-- 用户名：yueqiu
-- 密码：yueqiu260530
-- 编码：utf8mb4
-
 ## 项目结构
 
 ```
@@ -71,19 +63,12 @@
 └── 大作业要求.txt                  # 需求文档
 ```
 
-## 快速开始
-
-### 前端运行
-直接在浏览器打开 `index.html` 即可使用前端静态页面。
-
 ### 后端运行
 1. 确保本地安装了 JDK 1.8+ 和 Maven
 2. 进入 `backend` 目录
 3. 执行 `mvn spring-boot:run` 启动后端服务
-4. 后端服务默认运行在 `http://localhost:8080`
-
-### 接口文档
-后端启动后访问 `http://localhost:8080/swagger-ui.html` 查看完整接口文档。
+4. 后端服务默认运行在 `http://localhost:8082`
+点击`http://localhost:8082/backend`进入网页
 
 ## 数据库表设计
 
