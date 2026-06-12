@@ -241,12 +241,12 @@ nav {
 
 .hero-characters {
     display: flex;
-    gap: 8px;
+    gap: 10px;
     z-index: 3;
 }
 
 .hero-character {
-    width: 60px;
+    width: 100px;
     height: auto;
     animation: float 3s ease-in-out infinite;
 }
@@ -392,6 +392,48 @@ nav {
 .activity-actions .btn-secondary {
     padding: 10px 12px;
     font-size: 14px;
+}
+
+/* 活动状态遮罩样式 */
+.activity-status-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    z-index: 10;
+    transition: opacity 0.3s ease;
+    text-align: center;
+    padding: 8px 12px;
+}
+
+.activity-status-overlay.pending-review {
+    background: rgba(255, 193, 7, 0.85); /* 黄色半透明 */
+}
+
+.activity-status-overlay.in-progress {
+    background: rgba(16, 185, 129, 0.85); /* 绿色半透明 */
+}
+
+.activity-status-overlay.rejected,
+.activity-status-overlay.offline {
+    background: rgba(239, 68, 68, 0.85); /* 红色半透明 */
+    flex-direction: column;
+    gap: 4px;
+}
+
+.activity-status-reason {
+    font-size: 12px;
+    font-weight: 400;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 /* 页脚样式 */

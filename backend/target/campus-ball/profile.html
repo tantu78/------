@@ -245,6 +245,153 @@
             color: var(--airbnb-red);
             font-weight: 500;
         }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.25s ease;
+        }
+
+        .modal-dialog {
+            background: #fff;
+            border-radius: 20px;
+            padding: 0;
+            width: 480px;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .modal-header { padding: 28px 32px 0; }
+        .modal-header h2 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--airbnb-dark);
+        }
+        .modal-subtitle {
+            font-size: 14px;
+            color: var(--airbnb-gray);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .modal-body { padding: 24px 32px; }
+        .modal-footer {
+            padding: 0 32px 28px;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        .btn-cancel {
+            background: var(--airbnb-bg);
+            color: var(--airbnb-dark);
+            border: none;
+            padding: 10px 28px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-submit {
+            background: linear-gradient(135deg, var(--airbnb-red) 0%, var(--airbnb-orange) 100%);
+            color: white;
+            border: none;
+            padding: 10px 28px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .evaluation-target {
+            background: var(--airbnb-bg);
+            border-radius: 12px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .evaluation-target .target-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--airbnb-red), var(--airbnb-orange));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+        }
+        .evaluation-target .target-name { font-weight: 600; font-size: 15px; }
+        .evaluation-target .target-badge {
+            font-size: 12px;
+            color: var(--airbnb-red);
+            background: rgba(255, 90, 95, 0.1);
+            padding: 2px 10px;
+            border-radius: 20px;
+        }
+        .score-preview {
+            font-size: 14px;
+            color: #f59e0b;
+            margin-left: auto;
+            min-width: 100px;
+            text-align: right;
+        }
+
+        .score-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .score-row label {
+            min-width: 80px;
+            font-weight: 500;
+            font-size: 15px;
+        }
+        .star-rating {
+            display: flex;
+            gap: 6px;
+        }
+        .star-rating .star {
+            font-size: 32px;
+            cursor: pointer;
+            color: #d1d5db;
+            transition: color 0.15s ease, transform 0.15s ease;
+            user-select: none;
+        }
+        .star-rating .star:hover { transform: scale(1.15); }
+        .star-rating .star.active { color: #f59e0b; }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--airbnb-border);
+            border-radius: 10px;
+            font-size: 14px;
+            color: var(--airbnb-dark);
+            background: #fff;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            font-family: inherit;
+            resize: vertical;
+        }
+        .form-input:focus {
+            border-color: var(--airbnb-red);
+            box-shadow: 0 0 0 3px rgba(255, 90, 95, 0.12);
+        }
     </style>
 </head>
 <body>
@@ -400,20 +547,20 @@
 
                     <div class="stats-grid">
                         <div class="stat-card">
-                            <div class="stat-number">12</div>
+                            <div class="stat-number" id="stat-participated-count">--</div>
                             <div class="stat-label">参与活动</div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-number">3</div>
+                            <div class="stat-number" id="stat-organized-count">--</div>
                             <div class="stat-label">发起活动</div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-number">36</div>
-                            <div class="stat-label">运动时长(小时)</div>
+                            <div class="stat-number" id="stat-avg-skill-score">--</div>
+                            <div class="stat-label">平均球品</div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-number">8</div>
-                            <div class="stat-label">好友人数</div>
+                            <div class="stat-number" id="stat-avg-organizing-score">--</div>
+                            <div class="stat-label">平均组织</div>
                         </div>
                     </div>
 
@@ -468,10 +615,76 @@
         </div>
     </footer>
 
+    <!-- 评价弹窗 -->
+    <div class="modal-overlay" id="profile-evaluation-modal" style="display:none;">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h2>评价</h2>
+                <div class="modal-subtitle">
+                    <i class="fa fa-star" style="color:#f59e0b;"></i> 你的评价将展示在活动详情中
+                </div>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom: 16px;">
+                    <label style="font-weight: 500; display: block; margin-bottom: 8px; font-size: 15px;">选择评价对象</label>
+                    <select id="profile-eval-target-select" class="form-input" onchange="profileOnTargetChange()">
+                    </select>
+                </div>
+
+                <div class="evaluation-target">
+                    <div class="target-avatar">
+                        <i class="fa fa-user"></i>
+                    </div>
+                    <div>
+                        <div class="target-name" id="profile-eval-target-name">选择评价对象</div>
+                        <div class="target-badge" id="profile-eval-target-badge">参与者</div>
+                    </div>
+                    <div class="score-preview" id="profile-eval-score-preview"></div>
+                </div>
+
+                <div class="score-row">
+                    <label>球技水平</label>
+                    <div class="star-rating" id="profile-eval-skill-stars">
+                        <span class="star" data-value="1">★</span>
+                        <span class="star" data-value="2">★</span>
+                        <span class="star" data-value="3">★</span>
+                        <span class="star" data-value="4">★</span>
+                        <span class="star" data-value="5">★</span>
+                    </div>
+                </div>
+
+                <div class="score-row" id="profile-organizing-score-row">
+                    <label>组织能力</label>
+                    <div class="star-rating" id="profile-eval-organizing-stars">
+                        <span class="star" data-value="1">★</span>
+                        <span class="star" data-value="2">★</span>
+                        <span class="star" data-value="3">★</span>
+                        <span class="star" data-value="4">★</span>
+                        <span class="star" data-value="5">★</span>
+                    </div>
+                </div>
+
+                <div style="margin-top: 4px;">
+                    <label style="font-weight: 500; display: block; margin-bottom: 8px; font-size: 15px;">评价内容</label>
+                    <textarea id="profile-eval-comment" class="form-input" rows="3" placeholder="说说你的感受..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="profileCloseEvaluationModal()">取消</button>
+                <button class="btn-submit" onclick="profileSubmitEvaluation()">提交评价</button>
+            </div>
+        </div>
+    </div>
+
     <script src="js/api.js"></script>
     <script src="js/main.js"></script>
     <script>
         var currentProfileUser = null;
+        var profileEvalActivity = null;
+        var profileActivityParticipants = [];
+        var profileEvalSkillScore = 0;
+        var profileEvalOrganizingScore = 0;
+        var profileEvalTargetUserId = null;
 
         function switchTab(tabName) {
             document.querySelectorAll('[id$="-tab"]').forEach(function(tab) {
@@ -528,6 +741,33 @@
             setFavoriteCheckboxes(user.favoriteSport);
 
             loadMyActivities();
+            loadStats();
+        }
+
+        function loadStats() {
+            if (!currentProfileUser) return;
+
+            // 加载参与活动数和发起活动数
+            API.activity.my().then(function(res) {
+                if (res.code === 200 && res.data) {
+                    var activities = res.data;
+                    var participated = activities.length;
+                    var organized = activities.filter(function(a) { 
+                        return a.organizerId === currentProfileUser.id; 
+                    }).length;
+
+                    document.getElementById('stat-participated-count').textContent = participated;
+                    document.getElementById('stat-organized-count').textContent = organized;
+                }
+            });
+
+            // 加载评分统计
+            API.evaluation.getUserScore(currentProfileUser.id).then(function(res) {
+                if (res.code === 200 && res.data) {
+                    document.getElementById('stat-avg-skill-score').textContent = res.data.avgSkillScore || 0;
+                    document.getElementById('stat-avg-organizing-score').textContent = res.data.avgOrganizingScore || 0;
+                }
+            });
         }
 
         function loadMyActivities() {
@@ -539,8 +779,213 @@
                         container.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;"><i class="fa fa-calendar"></i><p>还没有参与任何活动</p><a href="index.html" class="btn-primary" style="display: inline-block; margin-top: 12px;">去看看活动</a></div>';
                         return;
                     }
-                    container.innerHTML = activities.map(function(a) { return activityCardHtml(a); }).join('');
+                    container.innerHTML = activities.map(function(a) { return profileActivityCardHtml(a); }).join('');
                 }
+            });
+        }
+
+        function isActivityEnded(a) {
+            if (!a || !a.endTime) return false;
+            var endTime = new Date(a.endTime);
+            var now = new Date();
+            return now >= endTime;
+        }
+
+        function profileActivityCardHtml(a) {
+            var venueName = a.venueName || '未知场地';
+            var organizerName = a.organizerName || '未知';
+            var current = a.currentParticipants || 0;
+            var max = a.maxParticipants || 0;
+            var coverImg = a.coverImage || 'https://picsum.photos/seed/activity' + a.id + '/600/400';
+            var isFull = current >= max;
+            var badgeHtml = '';
+            if (isFull) {
+                badgeHtml = '<span class="activity-badge">已满</span>';
+            } else if (max - current <= 2) {
+                badgeHtml = '<span class="activity-badge" style="background: var(--airbnb-orange);">即将满员</span>';
+            }
+
+            var ended = isActivityEnded(a);
+
+            return '<div class="card activity-card" style="cursor:default;">' +
+                '<div class="activity-image" style="cursor:pointer;" onclick="window.location.href=\'activity-detail.html?id=' + a.id + '\'">' +
+                    '<img src="' + coverImg + '" alt="' + a.title + '" style="width:100%;height:100%;object-fit:cover;">' +
+                    badgeHtml +
+                '</div>' +
+                '<div class="activity-info">' +
+                    '<div class="activity-time">' +
+                        '<i class="fa fa-calendar"></i>' +
+                        '<span>' + formatDateRange(a.startTime, a.endTime) + '</span>' +
+                    '</div>' +
+                    '<h3 class="activity-title" style="cursor:pointer;" onclick="window.location.href=\'activity-detail.html?id=' + a.id + '\'">' + a.title + '</h3>' +
+                    '<div class="activity-location">' +
+                        '<i class="fa fa-map-marker"></i>' +
+                        '<span>' + venueName + '</span>' +
+                    '</div>' +
+                    '<div class="activity-meta">' +
+                        '<div class="activity-participants">' +
+                            '<i class="fa fa-users"></i>' +
+                            '<span>' + current + '/' + max + '人</span>' +
+                        '</div>' +
+                        '<div class="activity-organizer">组织者：' + organizerName + '</div>' +
+                    '</div>' +
+                    '<div class="activity-actions">' +
+                        (ended ? '<button class="btn-primary" onclick="profileOpenEvaluationModal(' + a.id + ')">评价</button>' : '') +
+                        '<button class="btn-secondary" onclick="event.preventDefault(); window.location.href=\'activity-detail.html?id=' + a.id + '\'">详情</button>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        }
+
+        function profileOpenEvaluationModal(activityId) {
+            API.activity.detail(activityId).then(function(res) {
+                if (res.code === 200 && res.data) {
+                    profileEvalActivity = res.data;
+                    profileLoadParticipants(activityId);
+                }
+            });
+        }
+
+        function profileLoadParticipants(activityId) {
+            API.activity.participants(activityId).then(function(res) {
+                if (res.code === 200 && res.data) {
+                    profileActivityParticipants = res.data;
+                    profilePopulateTargetSelect();
+                    profileInitStarRating();
+                    document.getElementById('profile-evaluation-modal').style.display = 'flex';
+                }
+            });
+        }
+
+        function profilePopulateTargetSelect() {
+            var select = document.getElementById('profile-eval-target-select');
+            var currentUser = getCurrentUser();
+            var currentUserId = currentUser ? currentUser.id : null;
+
+            var html = '<option value="">请选择评价对象</option>';
+
+            profileActivityParticipants.forEach(function(p) {
+                if (p.userId === currentUserId) return;
+                var isOrganizer = profileEvalActivity && profileEvalActivity.organizerId === p.userId;
+                html += '<option value="' + p.userId + '" data-is-organizer="' + isOrganizer + '">' + 
+                    (p.username || '用户') + (isOrganizer ? ' (组织者)' : '') + '</option>';
+            });
+
+            select.innerHTML = html;
+        }
+
+        function profileOnTargetChange() {
+            var select = document.getElementById('profile-eval-target-select');
+            var selectedOption = select.options[select.selectedIndex];
+
+            if (!selectedOption || !selectedOption.value) {
+                profileEvalTargetUserId = null;
+                document.getElementById('profile-eval-target-name').textContent = '选择评价对象';
+                document.getElementById('profile-eval-target-badge').textContent = '参与者';
+                return;
+            }
+
+            profileEvalTargetUserId = parseInt(selectedOption.value);
+            var isOrganizer = selectedOption.dataset.isOrganizer === 'true';
+
+            var targetUser = profileActivityParticipants.find(function(p) { return p.userId === profileEvalTargetUserId; });
+
+            document.getElementById('profile-eval-target-name').textContent = targetUser ? (targetUser.username || '用户') : '用户';
+            document.getElementById('profile-eval-target-badge').textContent = isOrganizer ? '活动组织者' : '参与者';
+
+            var organizingRow = document.getElementById('profile-organizing-score-row');
+            if (isOrganizer) {
+                organizingRow.style.opacity = '1';
+            } else {
+                organizingRow.style.opacity = '0.5';
+                profileEvalOrganizingScore = 0;
+                profileUpdateStarDisplay('profile-eval-organizing-stars', 0);
+            }
+
+            profileUpdateScorePreview();
+        }
+
+        function profileInitStarRating() {
+            document.getElementById('profile-eval-skill-stars').addEventListener('click', function(e) {
+                if (e.target.classList.contains('star')) {
+                    profileEvalSkillScore = parseInt(e.target.dataset.value);
+                    profileUpdateStarDisplay('profile-eval-skill-stars', profileEvalSkillScore);
+                    profileUpdateScorePreview();
+                }
+            });
+
+            document.getElementById('profile-eval-organizing-stars').addEventListener('click', function(e) {
+                if (e.target.classList.contains('star')) {
+                    profileEvalOrganizingScore = parseInt(e.target.dataset.value);
+                    profileUpdateStarDisplay('profile-eval-organizing-stars', profileEvalOrganizingScore);
+                    profileUpdateScorePreview();
+                }
+            });
+
+            document.getElementById('profile-evaluation-modal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    profileCloseEvaluationModal();
+                }
+            });
+        }
+
+        function profileUpdateStarDisplay(containerId, score) {
+            var stars = document.querySelectorAll('#' + containerId + ' .star');
+            stars.forEach(function(star) {
+                if (parseInt(star.dataset.value) <= score) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+        }
+
+        function profileUpdateScorePreview() {
+            var preview = document.getElementById('profile-eval-score-preview');
+            var parts = [];
+            if (profileEvalSkillScore > 0) parts.push('球技 ' + profileEvalSkillScore + '★');
+            if (profileEvalOrganizingScore > 0) parts.push('组织 ' + profileEvalOrganizingScore + '★');
+            preview.textContent = parts.join('  ');
+        }
+
+        function profileCloseEvaluationModal() {
+            document.getElementById('profile-evaluation-modal').style.display = 'none';
+            profileEvalSkillScore = 0;
+            profileEvalOrganizingScore = 0;
+            profileEvalTargetUserId = null;
+            profileUpdateStarDisplay('profile-eval-skill-stars', 0);
+            profileUpdateStarDisplay('profile-eval-organizing-stars', 0);
+            document.getElementById('profile-eval-comment').value = '';
+            document.getElementById('profile-eval-target-select').value = '';
+            document.getElementById('profile-eval-score-preview').textContent = '';
+            document.getElementById('profile-organizing-score-row').style.opacity = '1';
+        }
+
+        function profileSubmitEvaluation() {
+            if (!profileEvalActivity || !profileEvalTargetUserId) {
+                alert('请选择评价对象');
+                return;
+            }
+            if (profileEvalSkillScore < 1) {
+                alert('请给球技水平打分');
+                return;
+            }
+
+            var targetOption = document.querySelector('#profile-eval-target-select option[value="' + profileEvalTargetUserId + '"]');
+            var isOrganizer = targetOption && targetOption.dataset.isOrganizer === 'true';
+            var finalOrganizingScore = isOrganizer ? Math.max(profileEvalOrganizingScore, 1) : 5;
+
+            var comment = document.getElementById('profile-eval-comment').value.trim();
+
+            API.evaluation.submit(profileEvalActivity.id, profileEvalTargetUserId, profileEvalSkillScore, finalOrganizingScore, comment).then(function(res) {
+                if (res.code === 200) {
+                    showToast('评价成功！', 'success');
+                    profileCloseEvaluationModal();
+                } else {
+                    showToast(res.message || '评价失败', 'error');
+                }
+            }).catch(function() {
+                showToast('网络错误', 'error');
             });
         }
 

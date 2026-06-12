@@ -555,19 +555,25 @@
     <div class="modal-overlay" id="evaluation-modal" style="display:none;">
         <div class="modal-dialog">
             <div class="modal-header">
-                <h2>评价组织者</h2>
-                <div class="modal-subtitle">
+                <h2>评价</h2>
+                <div class="modal-subtitle" id="modal-subtitle">
                     <i class="fa fa-star" style="color:#f59e0b;"></i> 你的评价将展示在活动详情中
                 </div>
             </div>
             <div class="modal-body">
+                <div style="margin-bottom: 16px;">
+                    <label style="font-weight: 500; display: block; margin-bottom: 8px; font-size: 15px;">选择评价对象</label>
+                    <select id="eval-target-select" class="form-input" onchange="onTargetChange()">
+                    </select>
+                </div>
+
                 <div class="evaluation-target">
                     <div class="target-avatar">
                         <i class="fa fa-user"></i>
                     </div>
                     <div>
-                        <div class="target-name" id="eval-organizer-name">组织者</div>
-                        <div class="target-badge">活动组织者</div>
+                        <div class="target-name" id="eval-target-name">选择评价对象</div>
+                        <div class="target-badge" id="eval-target-badge">参与者</div>
                     </div>
                     <div class="score-preview" id="eval-score-preview"></div>
                 </div>
@@ -583,7 +589,7 @@
                     </div>
                 </div>
 
-                <div class="score-row">
+                <div class="score-row" id="organizing-score-row">
                     <label>组织能力</label>
                     <div class="star-rating" id="eval-organizing-stars">
                         <span class="star" data-value="1">★</span>
@@ -596,7 +602,7 @@
 
                 <div style="margin-top: 4px;">
                     <label style="font-weight: 500; display: block; margin-bottom: 8px; font-size: 15px;">评价内容</label>
-                    <textarea id="eval-comment" class="form-input" rows="3" placeholder="说说你对这次活动和组织者的感受..."></textarea>
+                    <textarea id="eval-comment" class="form-input" rows="3" placeholder="说说你的感受..."></textarea>
                 </div>
             </div>
             <div class="modal-footer">
@@ -610,8 +616,10 @@
     <script src="js/main.js"></script>
     <script>
         var currentActivity = null;
+        var activityParticipants = [];
         var evalSkillScore = 0;
         var evalOrganizingScore = 0;
+        var evalTargetUserId = null;
 
         function getActivityId() {
             var params = new URLSearchParams(window.location.search);
@@ -630,6 +638,7 @@
                     currentActivity = res.data;
                     renderActivity(currentActivity);
                     loadEvaluations();
+                    loadParticipants();
                     updateEvaluateButton();
                 } else {
                     document.getElementById('activity-title').textContent = '活动不存在';
@@ -759,32 +768,6 @@
             preview.textContent = parts.join('  ');
         }
 
-        function submitEvaluation() {
-            if (!currentActivity) return;
-            if (evalSkillScore < 1) {
-                alert('请给球技水平打分');
-                return;
-            }
-            if (evalOrganizingScore < 1) {
-                alert('请给组织能力打分');
-                return;
-            }
-
-            var comment = document.getElementById('eval-comment').value.trim();
-
-            API.evaluation.submit(currentActivity.id, currentActivity.organizerId, evalSkillScore, evalOrganizingScore, comment).then(function(res) {
-                if (res.code === 200) {
-                    showToast('评价成功！', 'success');
-                    closeEvaluationModal();
-                    loadEvaluations();
-                } else {
-                    showToast(res.message || '评价失败', 'error');
-                }
-            }).catch(function() {
-                showToast('网络错误', 'error');
-            });
-        }
-
         function renderActivity(a) {
             document.getElementById('activity-title').textContent = a.title || '未命名活动';
             document.getElementById('activity-cover').src = a.coverImage || 'https://picsum.photos/seed/activity' + a.id + '/1200/800';
@@ -859,6 +842,131 @@
                 } else {
                     showToast(res.message || '退出失败', 'error');
                 }
+            });
+        }
+
+        function loadParticipants() {
+            if (!currentActivity) return;
+            API.activity.participants(currentActivity.id).then(function(res) {
+                if (res.code === 200 && res.data) {
+                    activityParticipants = res.data;
+                    populateTargetSelect();
+                }
+            });
+        }
+
+        function populateTargetSelect() {
+            var select = document.getElementById('eval-target-select');
+            var currentUser = getCurrentUser();
+            var currentUserId = currentUser ? currentUser.id : null;
+
+            var html = '<option value="">请选择评价对象</option>';
+
+            activityParticipants.forEach(function(p) {
+                if (p.userId === currentUserId) return;
+                var isOrganizer = currentActivity && currentActivity.organizerId === p.userId;
+                html += '<option value="' + p.userId + '" data-is-organizer="' + isOrganizer + '">' + 
+                    (p.username || '用户') + (isOrganizer ? ' (组织者)' : '') + '</option>';
+            });
+
+            select.innerHTML = html;
+        }
+
+        function onTargetChange() {
+            var select = document.getElementById('eval-target-select');
+            var selectedOption = select.options[select.selectedIndex];
+
+            if (!selectedOption || !selectedOption.value) {
+                evalTargetUserId = null;
+                document.getElementById('eval-target-name').textContent = '选择评价对象';
+                document.getElementById('eval-target-badge').textContent = '参与者';
+                return;
+            }
+
+            evalTargetUserId = parseInt(selectedOption.value);
+            var isOrganizer = selectedOption.dataset.isOrganizer === 'true';
+
+            var targetUser = activityParticipants.find(function(p) { return p.userId === evalTargetUserId; });
+
+            document.getElementById('eval-target-name').textContent = targetUser ? (targetUser.username || '用户') : '用户';
+            document.getElementById('eval-target-badge').textContent = isOrganizer ? '活动组织者' : '参与者';
+
+            var organizingRow = document.getElementById('organizing-score-row');
+            if (isOrganizer) {
+                organizingRow.style.opacity = '1';
+            } else {
+                organizingRow.style.opacity = '0.5';
+                evalOrganizingScore = 0;
+                updateStarDisplay('eval-organizing-stars', 0);
+            }
+
+            updateScorePreview();
+        }
+
+        function isActivityEnded() {
+            if (!currentActivity || !currentActivity.endTime) return false;
+            var endTime = new Date(currentActivity.endTime);
+            var now = new Date();
+            return now >= endTime;
+        }
+
+        function updateEvaluateButton() {
+            var btn = document.getElementById('btn-evaluate');
+            if (!btn) return;
+
+            var user = getCurrentUser();
+            if (!user) {
+                btn.style.display = 'none';
+                return;
+            }
+
+            if (!isActivityEnded()) {
+                btn.style.display = 'none';
+                return;
+            }
+
+            btn.style.display = 'inline-flex';
+        }
+
+        function closeEvaluationModal() {
+            document.getElementById('evaluation-modal').style.display = 'none';
+            evalSkillScore = 0;
+            evalOrganizingScore = 0;
+            evalTargetUserId = null;
+            updateStarDisplay('eval-skill-stars', 0);
+            updateStarDisplay('eval-organizing-stars', 0);
+            document.getElementById('eval-comment').value = '';
+            document.getElementById('eval-target-select').value = '';
+            document.getElementById('eval-score-preview').textContent = '';
+            document.getElementById('organizing-score-row').style.opacity = '1';
+        }
+
+        function submitEvaluation() {
+            if (!currentActivity || !evalTargetUserId) {
+                alert('请选择评价对象');
+                return;
+            }
+            if (evalSkillScore < 1) {
+                alert('请给球技水平打分');
+                return;
+            }
+
+            var targetOption = document.querySelector('#eval-target-select option[value="' + evalTargetUserId + '"]');
+            var isOrganizer = targetOption && targetOption.dataset.isOrganizer === 'true';
+            var finalOrganizingScore = isOrganizer ? Math.max(evalOrganizingScore, 1) : 5;
+
+            var comment = document.getElementById('eval-comment').value.trim();
+
+            API.evaluation.submit(currentActivity.id, evalTargetUserId, evalSkillScore, finalOrganizingScore, comment).then(function(res) {
+                if (res.code === 200) {
+                    showToast('评价成功！', 'success');
+                    closeEvaluationModal();
+                    loadEvaluations();
+                } else {
+                    showToast(res.message || '评价失败', 'error');
+                }
+            }).catch(function() {
+                showToast('网络错误', 'error');
             });
         }
 

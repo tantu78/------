@@ -59,9 +59,9 @@
         }
 
         .forum-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
         }
 
         .forum-card {
@@ -222,7 +222,7 @@
             .forum-sort {
                 justify-content: center;
             }
-            .forum-card-meta {
+            .forum-list {
                 grid-template-columns: 1fr;
             }
         }
@@ -271,7 +271,7 @@
                 <div class="hero-text">
                     <h1>找到身边的球友，随时约球</h1>
                     <p>覆盖全校所有运动场地，支持篮球、羽毛球、乒乓球等多种运动</p>
-                    <button class="hero-btn">立即找活动</button>
+                    
                 </div>
                 <div class="hero-characters">
                     <img src="img/篮球.jpg" alt="篮球" class="hero-character">

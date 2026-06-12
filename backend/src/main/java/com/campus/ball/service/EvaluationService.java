@@ -10,6 +10,7 @@ import com.campus.ball.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +40,10 @@ public class EvaluationService {
         Activity activity = activityRepository.findById(activityId).orElse(null);
         if (activity == null) {
             return Result.error("活动不存在");
+        }
+
+        if (activity.getEndTime() == null || LocalDateTime.now().isBefore(activity.getEndTime())) {
+            return Result.error("活动未结束，无法评价");
         }
 
         if (!evaluationRepository.findByEvaluatorIdAndActivityIdAndTargetUserId(evaluatorId, activityId, targetUserId).isEmpty()) {

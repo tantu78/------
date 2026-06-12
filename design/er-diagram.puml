@@ -1,0 +1,154 @@
+@startuml 校园约球平台ER图
+' 样式设置
+skinparam linetype ortho
+skinparam class {
+    BackgroundColor<<ENTITY>> #E8F4F8
+    BackgroundColor<<RELATIONSHIP>> #FFF3E0
+    BackgroundColor<<ENUM>> #F3E5F5
+    BorderColor #37474F
+    ArrowColor #546E7A
+}
+
+' 用户实体
+entity "user" as user {
+    * id : Long <<PK>>
+    --
+    * username : String <<unique>>
+    * password : String
+    avatar : String
+    favorite_sport : String
+    current_location : Long
+    phone : String
+    description : String
+    * role : String
+    create_time : LocalDateTime
+}
+
+' 场地实体
+entity "venue" as venue {
+    * id : Long <<PK>>
+    --
+    * name : String
+    address : String
+    map_x : Integer
+    map_y : Integer
+    sport_type : String
+    capacity : Integer
+    description : String
+}
+
+' 活动实体
+entity "activity" as activity {
+    * id : Long <<PK>>
+    --
+    * title : String
+    * sport_type : String
+    * start_time : LocalDateTime
+    * end_time : LocalDateTime
+    * venue_id : Long <<FK>>
+    * max_participants : Integer
+    * current_participants : Integer
+    * organizer_id : Long <<FK>>
+    description : String
+    cover_image : String
+    is_public : Boolean
+    need_audit : Boolean
+    audit_status : String
+    reject_reason : String
+    offline_reason : String
+    start_reminder_sent : Boolean
+    end_reminder_sent : Boolean
+    create_time : LocalDateTime
+}
+
+' 活动参与实体
+entity "activity_participant" as participant {
+    * id : Long <<PK>>
+    --
+    * activity_id : Long <<FK>>
+    * user_id : Long <<FK>>
+    join_time : LocalDateTime
+    is_evaluated : Boolean
+    status : String
+}
+
+' 好友关系实体
+entity "friend_relation" as friend {
+    * id : Long <<PK>>
+    --
+    * user_id : Long <<FK>>
+    * friend_id : Long <<FK>>
+    status : String
+    create_time : LocalDateTime
+}
+
+' 活动推荐实体
+entity "activity_recommend" as recommend {
+    * id : Long <<PK>>
+    --
+    * sender_id : Long <<FK>>
+    * receiver_id : Long <<FK>>
+    * activity_id : Long <<FK>>
+    is_read : Boolean
+    create_time : LocalDateTime
+}
+
+' 评价实体
+entity "evaluation" as evaluation {
+    * id : Long <<PK>>
+    --
+    * evaluator_id : Long <<FK>>
+    * target_user_id : Long <<FK>>
+    * activity_id : Long <<FK>>
+    skill_score : Integer
+    organize_score : Integer
+    content : String
+    create_time : LocalDateTime
+}
+
+' 通知实体
+entity "notification" as notification {
+    * id : Long <<PK>>
+    --
+    * user_id : Long <<FK>>
+    type : String
+    content : String
+    related_id : Long
+    is_read : Boolean
+    create_time : LocalDateTime
+}
+
+' 活动审核日志实体
+entity "activity_audit_log" as auditLog {
+    * id : Long <<PK>>
+    --
+    * activity_id : Long <<FK>>
+    * auditor_id : Long <<FK>>
+    action : String
+    reason : String
+    create_time : LocalDateTime
+}
+
+' 关系定义
+user "1" -- "0..*" activity : 组织者 >
+user "1" -- "0..*" participant : 参与 >
+venue "1" -- "0..*" activity : 举办 >
+activity "1" -- "0..*" participant : 有 >
+
+user "1" -- "0..*" friend : 发起申请 >
+user "1" -- "0..*" friend : 收到申请 >
+
+user "1" -- "0..*" recommend : 发送 >
+user "1" -- "0..*" recommend : 接收 >
+activity "1" -- "0..*" recommend : 被推荐 >
+
+user "1" -- "0..*" evaluation : 评价 >
+user "1" -- "0..*" evaluation : 被评价 >
+activity "1" -- "0..*" evaluation : 有 >
+
+user "1" -- "0..*" notification : 接收 >
+
+user "1" -- "0..*" auditLog : 审核 >
+activity "1" -- "0..*" auditLog : 有 >
+
+@enduml

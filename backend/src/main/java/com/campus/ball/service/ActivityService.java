@@ -149,7 +149,7 @@ public class ActivityService {
         List<ActivityParticipant> participants = participantRepository.findByUserId(user.getId());
         List<Activity> activities = participants.stream()
                 .map(p -> activityRepository.findById(p.getActivityId()).orElse(null))
-                .filter(a -> a != null && a.getEndTime().isAfter(LocalDateTime.now()))
+                .filter(a -> a != null)
                 .collect(Collectors.toList());
         activities.forEach(this::fillActivityInfo);
         return Result.success(activities);

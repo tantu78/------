@@ -129,10 +129,33 @@ function activityCardHtml(a) {
         badgeHtml = '<span class="activity-badge" style="background: var(--airbnb-orange);">即将满员</span>';
     }
 
+    // 活动状态遮罩
+    var statusOverlay = '';
+    var status = a.status || 'upcoming'; // 默认待开始
+    var statusReason = a.rejectReason || a.offlineReason || '';
+    
+    if (status === 'pending_review') {
+        statusOverlay = '<div class="activity-status-overlay pending-review">待审核</div>';
+    } else if (status === 'in_progress') {
+        statusOverlay = '<div class="activity-status-overlay in-progress">进行中</div>';
+    } else if (status === 'rejected') {
+        statusOverlay = '<div class="activity-status-overlay rejected">' +
+            '<div>已驳回</div>' +
+            (statusReason ? '<div class="activity-status-reason">' + statusReason + '</div>' : '') +
+        '</div>';
+    } else if (status === 'offline') {
+        statusOverlay = '<div class="activity-status-overlay offline">' +
+            '<div>已下架</div>' +
+            (statusReason ? '<div class="activity-status-reason">' + statusReason + '</div>' : '') +
+        '</div>';
+    }
+    // 待开始状态不需要遮罩
+
     return '<a href="activity-detail.html?id=' + a.id + '" class="card activity-card">' +
         '<div class="activity-image">' +
             '<img src="' + coverImg + '" alt="' + a.title + '" style="width: 100%; height: 100%; object-fit: cover;">' +
             badgeHtml +
+            statusOverlay +
         '</div>' +
         '<div class="activity-info">' +
             '<div class="activity-time">' +

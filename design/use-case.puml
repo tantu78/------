@@ -1,0 +1,125 @@
+@startuml 校园约球平台用例图
+' 样式设置
+skinparam actor {
+    BackgroundColor #BBDEFB
+    BorderColor #1976D2
+}
+
+skinparam usecase {
+    BackgroundColor #E8F5E9
+    BorderColor #388E3C
+}
+
+' 参与者
+actor "普通用户" as user
+actor "管理员" as admin
+
+' 包：用户认证
+package "用户认证模块" {
+    usecase "注册账号" as UC1
+    usecase "登录系统" as UC2
+    usecase "退出登录" as UC3
+}
+
+' 包：活动管理
+package "活动管理模块" {
+    usecase "浏览活动列表" as UC4
+    usecase "按运动类型筛选活动" as UC5
+    usecase "查看活动详情" as UC6
+    usecase "发起活动" as UC7
+    usecase "加入活动" as UC8
+    usecase "退出活动" as UC9
+    usecase "根据喜好推荐活动" as UC10
+    usecase "查看我参与的活动" as UC11
+}
+
+' 包：场地管理
+package "场地模块" {
+    usecase "查看场地列表" as UC12
+    usecase "地图选点筛选活动" as UC13
+}
+
+' 包：好友系统
+package "好友系统模块" {
+    usecase "添加好友" as UC14
+    usecase "处理好友申请" as UC15
+    usecase "查看好友列表" as UC16
+    usecase "向好友推荐活动" as UC17
+}
+
+' 包：评价系统
+package "评价系统模块" {
+    usecase "评价活动参与者" as UC18
+    usecase "球技评分" as UC19
+    usecase "组织能力评分" as UC20
+}
+
+' 包：通知系统
+package "通知系统模块" {
+    usecase "接收活动通知" as UC21
+    usecase "查看通知列表" as UC22
+    usecase "标记已读" as UC23
+}
+
+' 包：个人中心
+package "个人中心模块" {
+    usecase "修改个人信息" as UC24
+    usecase "设置运动喜好" as UC25
+    usecase "上传头像" as UC26
+}
+
+' 包：管理后台
+package "管理后台模块" {
+    usecase "审核活动" as UC27
+    usecase "驳回活动" as UC28
+    usecase "下架违规活动" as UC29
+    usecase "查看审核日志" as UC30
+    usecase "管理场地信息" as UC31
+    usecase "管理用户" as UC32
+}
+
+' 关系 - 普通用户
+user --> UC1
+user --> UC2
+user --> UC3
+user --> UC4
+user --> UC5
+user --> UC6
+user --> UC7
+user --> UC8
+user --> UC9
+user --> UC10
+user --> UC11
+user --> UC12
+user --> UC13
+user --> UC14
+user --> UC15
+user --> UC16
+user --> UC17
+user --> UC18
+user --> UC19
+user --> UC20
+user --> UC21
+user --> UC22
+user --> UC23
+user --> UC24
+user --> UC25
+user --> UC26
+
+' 关系 - 管理员
+admin --> UC2
+admin --> UC27
+admin --> UC28
+admin --> UC29
+admin --> UC30
+admin --> UC31
+admin --> UC32
+
+' 包含关系
+UC18 ..> UC19 : <<include>>
+UC18 ..> UC20 : <<include>>
+
+UC27 ..> UC28 : <<include>>
+UC27 ..> UC29 : <<include>>
+
+@enduml
